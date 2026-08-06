@@ -14,6 +14,28 @@ import type { CollectionAfterChangeHook, CollectionAfterDeleteHook, GlobalAfterC
  * sin la segunda mitad, despublicar algo lo dejaría viéndose en la versión
  * cacheada hasta la próxima revalidación por tiempo.
  */
+/**
+ * `revalidatePath` solo funciona dentro del contexto de una petición de Next.
+ * Payload no siempre corre ahí: `payload run` para la siembra, los scripts de
+ * mantenimiento y la cola de jobs son Node a secas. En esos casos la llamada
+ * lanza «Invariant: static generation store missing» y, por ser un hook
+ * `afterChange`, tumba la operación completa — crear una noticia desde un
+ * script fallaba por no poder invalidar una caché que en ese contexto ni
+ * siquiera existe.
+ *
+ * El error se descarta solo en ese caso: sin contexto de Next no hay caché de
+ * rutas que invalidar. Desde el panel, que es el camino normal, el
+ * comportamiento no cambia en nada.
+ */
+const revalidar = (ruta: string, tipo?: 'layout' | 'page') => {
+  try {
+    if (tipo) revalidatePath(ruta, tipo)
+    else revalidatePath(ruta)
+  } catch {
+    /* Fuera de Next: nada que revalidar. */
+  }
+}
+
 const fuePublicado = (doc: { _status?: string }, previousDoc?: { _status?: string }) =>
   doc?._status === 'published' || previousDoc?._status === 'published'
 
@@ -22,11 +44,11 @@ const revalidarConSlug =
   (base: string, incluirPortada = true): CollectionAfterChangeHook =>
   ({ doc, previousDoc }) => {
     if (fuePublicado(doc, previousDoc)) {
-      if (incluirPortada) revalidatePath('/')
-      revalidatePath(base)
-      if (doc.slug) revalidatePath(`${base}/${doc.slug}`)
+      if (incluirPortada) revalidar('/')
+      revalidar(base)
+      if (doc.slug) revalidar(`${base}/${doc.slug}`)
       if (previousDoc?.slug && previousDoc.slug !== doc.slug) {
-        revalidatePath(`${base}/${previousDoc.slug}`)
+        revalidar(`${base}/${previousDoc.slug}`)
       }
     }
     return doc
@@ -35,9 +57,9 @@ const revalidarConSlug =
 const revalidarAlBorrarConSlug =
   (base: string, incluirPortada = true): CollectionAfterDeleteHook =>
   ({ doc }) => {
-    if (incluirPortada) revalidatePath('/')
-    revalidatePath(base)
-    if (doc?.slug) revalidatePath(`${base}/${doc.slug}`)
+    if (incluirPortada) revalidar('/')
+    revalidar(base)
+    if (doc?.slug) revalidar(`${base}/${doc.slug}`)
     return doc
   }
 
@@ -54,24 +76,24 @@ export const revalidarGaleriasAlBorrar = revalidarAlBorrarConSlug('/galerias', f
    así que aquí no hay una ruta base que revalidar además del slug mismo. */
 export const revalidarPaginas: CollectionAfterChangeHook = ({ doc, previousDoc }) => {
   if (fuePublicado(doc, previousDoc)) {
-    if (doc.slug) revalidatePath(`/${doc.slug}`)
-    if (previousDoc?.slug && previousDoc.slug !== doc.slug) revalidatePath(`/${previousDoc.slug}`)
+    if (doc.slug) revalidar(`/${doc.slug}`)
+    if (previousDoc?.slug && previousDoc.slug !== doc.slug) revalidar(`/${previousDoc.slug}`)
   }
   return doc
 }
 
 export const revalidarPaginasAlBorrar: CollectionAfterDeleteHook = ({ doc }) => {
-  if (doc?.slug) revalidatePath(`/${doc.slug}`)
+  if (doc?.slug) revalidar(`/${doc.slug}`)
   return doc
 }
 
 /* Los destacados solo aparecen en el carrusel de portada. */
 export const revalidarDestacados: CollectionAfterChangeHook = ({ doc }) => {
-  revalidatePath('/')
+  revalidar('/')
   return doc
 }
 export const revalidarDestacadosAlBorrar: CollectionAfterDeleteHook = ({ doc }) => {
-  revalidatePath('/')
+  revalidar('/')
   return doc
 }
 
@@ -80,6 +102,6 @@ export const revalidarDestacadosAlBorrar: CollectionAfterDeleteHook = ({ doc }) 
    con `'layout'`, que arrastra a todas las páginas que cuelgan de ese layout
    — no alcanza con revalidar solo `/`. */
 export const revalidarSitio: GlobalAfterChangeHook = ({ doc }) => {
-  revalidatePath('/', 'layout')
+  revalidar('/', 'layout')
   return doc
 }
