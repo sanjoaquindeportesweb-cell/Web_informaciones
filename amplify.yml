@@ -1,0 +1,24 @@
+version: 1
+frontend:
+  phases:
+    preBuild:
+      commands:
+        # La imagen de build de Amplify no trae pnpm. Corepack lo instala en la
+        # version exacta que declara `packageManager` en package.json, para que
+        # el lockfile v9 se resuelva igual que en local.
+        - nvm install 22
+        - nvm use 22
+        - corepack enable
+        - corepack prepare --activate
+        - pnpm install --frozen-lockfile
+    build:
+      commands:
+        - pnpm run build
+  artifacts:
+    baseDirectory: .next
+    files:
+      - '**/*'
+  cache:
+    paths:
+      - .next/cache/**/*
+      - node_modules/**/*
