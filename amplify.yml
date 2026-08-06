@@ -13,6 +13,14 @@ frontend:
         - pnpm install --frozen-lockfile
     build:
       commands:
+        # Amplify inyecta las variables del panel solo en el contenedor de
+        # build. La funcion SSR no las hereda, y Payload muere en cada peticion
+        # con "missing secret key": la portada se veia por estar prerenderizada,
+        # pero /noticias, /[slug] y /api/media/file/* devolvian 500.
+        # Escribirlas en .env.production hace que Next las cargue tambien al
+        # servir. Se listan una por una a proposito: `env` completo volcaria al
+        # artefacto de despliegue variables del build que no pintan nada ahi.
+        - env | grep -E '^(DATABASE_URL|PAYLOAD_SECRET|S3_BUCKET|S3_REGION|CRON_SECRET|NEXT_PUBLIC_SERVER_URL)=' >> .env.production
         - pnpm run build
   artifacts:
     baseDirectory: .next

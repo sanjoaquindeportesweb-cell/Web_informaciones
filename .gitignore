@@ -40,6 +40,10 @@ next-env.d.ts
 
 .env
 
+# Lo genera el build de Amplify con los secretos del panel para que el runtime
+# SSR los vea. Si se compila en local, aquí queda una copia en texto plano.
+.env.production
+
 /media
 
 # Playwright
