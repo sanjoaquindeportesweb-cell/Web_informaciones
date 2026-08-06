@@ -2,6 +2,7 @@ import { mongooseAdapter } from '@payloadcms/db-mongodb'
 import { formBuilderPlugin, formBuilderTranslations } from '@payloadcms/plugin-form-builder'
 import { redirectsPlugin, redirectsTranslations } from '@payloadcms/plugin-redirects'
 import { lexicalEditor } from '@payloadcms/richtext-lexical'
+import { s3Storage } from '@payloadcms/storage-s3'
 import { es } from '@payloadcms/translations/languages/es'
 import path from 'path'
 import { buildConfig } from 'payload'
@@ -25,6 +26,24 @@ const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
 const URL_DEL_SITIO = process.env.NEXT_PUBLIC_SERVER_URL || 'http://localhost:3000'
+
+/* En un servidor propio las imágenes viven en `staticDir` (ver Media.ts) y eso
+   basta. En hosting serverless —Amplify, Lambda— el disco es de solo lectura y
+   efímero: subir una foto falla y las ya subidas desaparecen al reciclarse el
+   contenedor. Con `S3_BUCKET` definido, las subidas van al bucket; sin él, se
+   mantiene el disco local para que `pnpm dev` siga funcionando sin AWS. */
+const BUCKET_S3 = process.env.S3_BUCKET
+
+/* Las credenciales explícitas son para desarrollo. En AWS lo correcto es dejar
+   que el SDK use el rol IAM del entorno, que es lo que ocurre si estas dos
+   variables no están. */
+const CREDENCIALES_S3 =
+  process.env.S3_ACCESS_KEY_ID && process.env.S3_SECRET_ACCESS_KEY
+    ? {
+        accessKeyId: process.env.S3_ACCESS_KEY_ID,
+        secretAccessKey: process.env.S3_SECRET_ACCESS_KEY,
+      }
+    : undefined
 
 /* Cada colección con página propia sabe resolver su ruta pública. El `?
    vistaPrevia=1` es lo que las rutas de `app/(frontend)` leen para decidir
@@ -101,9 +120,24 @@ export default buildConfig({
   /* La publicación programada (noticias, recintos, galerías, páginas)
      depende de que algo procese la cola de jobs. `autoRun` con un cron cada
      minuto es correcto para un servidor Node propio — el plan del proyecto
-     ya descarta exportación estática y Vercel-serverless por eso mismo. */
+     ya descarta exportación estática y Vercel-serverless por eso mismo.
+
+     En serverless no hay proceso persistente: `autoRun` nunca dispararía y la
+     publicación programada quedaría muerta en silencio, que es lo peor que
+     puede pasar aquí. Por eso el cron interno se activa con `EJECUTAR_JOBS`
+     —se pone en un servidor propio— y, cuando no está, la cola se procesa
+     llamando `POST /api/payload-jobs/run` desde fuera (EventBridge, un cron
+     externo) con la cabecera `Authorization: Bearer $CRON_SECRET`. */
   jobs: {
-    autoRun: [{ cron: '* * * * *', queue: 'default' }],
+    access: {
+      run: ({ req }) => {
+        if (req.user) return true
+        const clave = process.env.CRON_SECRET
+        return Boolean(clave) && req.headers.get('authorization') === `Bearer ${clave}`
+      },
+    },
+    autoRun:
+      process.env.EJECUTAR_JOBS === 'true' ? [{ cron: '* * * * *', queue: 'default' }] : [],
   },
   plugins: [
     /* Para cuando cambie una URL como pasó con /escenarios → /recintos: un
@@ -145,5 +179,19 @@ export default buildConfig({
         labels: { singular: 'Respuesta de formulario', plural: 'Respuestas de formularios' },
       },
     }),
+    /* Se añade solo si hay bucket configurado: sin esto, el adaptador arranca
+       apuntando a un bucket vacío y toda subida falla en runtime. */
+    ...(BUCKET_S3
+      ? [
+          s3Storage({
+            collections: { media: true },
+            bucket: BUCKET_S3,
+            config: {
+              region: process.env.S3_REGION,
+              ...(CREDENCIALES_S3 ? { credentials: CREDENCIALES_S3 } : {}),
+            },
+          }),
+        ]
+      : []),
   ],
 })
