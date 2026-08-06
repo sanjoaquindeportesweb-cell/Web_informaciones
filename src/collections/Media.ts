@@ -8,6 +8,23 @@ import { estaAutenticado } from '@/payload/acceso'
 const dirname = path.dirname(fileURLToPath(import.meta.url))
 
 /**
+ * Convierte a WebP al momento de subir. Una foto de cámara o celular llega en
+ * JPEG y ocupa varias veces lo que ocuparía en WebP con calidad equivalente;
+ * como cada imagen genera además tres derivadas, el ahorro se multiplica por
+ * cuatro en almacenamiento y en tráfico.
+ *
+ * Se aplica a cada tamaño por separado a propósito: Payload documenta que
+ * `formatOptions` del bloque `upload` afecta solo al archivo original y no se
+ * hereda a `imageSizes` («Formatting image sizes needs to be done within each
+ * formatOptions individually»). Sin repetirlo, las derivadas seguirían
+ * saliendo en el formato de origen.
+ *
+ * La calidad baja a medida que baja el tamaño: un artefacto de compresión que
+ * se nota en un hero de 1600px es invisible en una miniatura de 400px.
+ */
+const aWebp = (calidad: number) => ({ format: 'webp' as const, options: { quality: calidad } })
+
+/**
  * Genera el placeholder borroso (LQIP) que usa `next/image` mientras carga la
  * foto de verdad. Va en `beforeChange`, no en `afterChange`: modifica `data`
  * directo, antes de guardar, así que no hace falta un segundo `update()`
@@ -60,10 +77,11 @@ export const Media: CollectionConfig = {
     staticDir: path.resolve(dirname, '../../media'),
     mimeTypes: ['image/jpeg', 'image/png', 'image/webp'],
     adminThumbnail: 'thumbnail',
+    formatOptions: aWebp(82),
     imageSizes: [
-      { name: 'thumbnail', width: 400, height: 300, position: 'centre' },
-      { name: 'card', width: 800, height: 600, position: 'centre' },
-      { name: 'hero', width: 1600, height: 900, position: 'centre' },
+      { name: 'thumbnail', width: 400, height: 300, position: 'centre', formatOptions: aWebp(72) },
+      { name: 'card', width: 800, height: 600, position: 'centre', formatOptions: aWebp(78) },
+      { name: 'hero', width: 1600, height: 900, position: 'centre', formatOptions: aWebp(80) },
     ],
   },
   hooks: {
