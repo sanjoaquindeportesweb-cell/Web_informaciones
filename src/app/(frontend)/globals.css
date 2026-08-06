@@ -1,0 +1,541 @@
+@import 'tailwindcss';
+
+/* ============================================================================
+   Sistema de diseño — Corporación Municipal de Deportes de San Joaquín
+
+   Este archivo es la fuente de verdad del portal, igual que index.css lo es en
+   la plataforma de trámites. Los valores están medidos y auditados contra
+   WCAG 2.1 AA; no se cambian «a ojo».
+
+   Dos reglas que son las que más se fallan:
+
+   1. La regla del naranja. #E2690F da 3,22:1 sobre el fondo real: alcanza para
+      superficie y texto grande, no para texto normal. Por eso hay dos tokens
+      distintos: --acento (#E2690F) para rellenos, bordes, iconos y estados
+      activos; --primary (#BD5200, 4,61:1) para texto de marca y botones
+      sólidos. No son intercambiables.
+
+   2. Los ratios se miden contra --background (#FBFAF8), no contra blanco puro.
+      La diferencia no es cosmética: #C25400 da 4,60:1 sobre blanco y 4,41:1
+      sobre este fondo, y por esos 0,19 dejaría de cumplir.
+   ========================================================================== */
+
+@layer base {
+  :root {
+    /* --- Colores del logotipo -------------------------------------------
+       Son de superficie y de series de gráfico. Como texto solo el morado
+       pasa AA (6,16:1); el naranja da 3,22:1, el rojo 4,3:1 y el lima 1,9:1. */
+    --sj-naranja: #e2690f;
+    --sj-lima: #66c40a;
+    --sj-verde: #4caf23;
+    --sj-morado: #8b0cf0;
+    --sj-rojo: #f40028;
+    /* El verde de marca oscurecido a 3,99:1 para que una serie se distinga
+       de la tarjeta blanca. El de marca queda en 2,2:1 y desaparece. */
+    --sj-verde-grafico: #3e9119;
+
+    /* --- Escala del naranja --------------------------------------------- */
+    --sj-naranja-50: #fef4ec;
+    --sj-naranja-100: #fde3cc;
+    --sj-naranja-200: #fac59a;
+    --sj-naranja-300: #f5a15f;
+    --sj-naranja-400: #ee8330;
+    --sj-naranja-500: #e2690f; /* institucional: solo superficie */
+    --sj-naranja-600: #bd5200; /* accesible: texto y botones sólidos */
+    --sj-naranja-700: #9c4400;
+    --sj-naranja-800: #7a3603;
+    --sj-naranja-900: #612d07;
+
+    /* --- Identidad institucional: la masa -------------------------------
+       Sobre el campo violeta el texto es blanco o --violeta-sobre, nunca un
+       color de marca: encima del violeta el naranja da 3,05:1, el rojo 2,38:1
+       y el morado 1,66:1. */
+    --sj-violeta: #4527a0; /* hero y cabecera — 10,24:1 con blanco */
+    --sj-violeta-honda: #2e1b6b; /* barra de utilidad y pie — 14,14:1 */
+    --sj-violeta-50: #efebfa;
+    --violeta-sobre: #d8d2ee; /* texto secundario sobre violeta — 7,01:1 */
+    --violeta-activo: #fac59a; /* ítem activo sobre violeta — 6,59:1 */
+
+    /* --- Bandas de la banderola -----------------------------------------
+       Decorativas y nada más: entre ellas hay 1,5:1, así que no pueden
+       codificar sección, categoría ni estado. Son masa de color. */
+    --banda-lima: #81ba27;
+    --banda-naranja: #e65100;
+    --banda-rojo: #d5254c;
+
+    /* --- Superficies ----------------------------------------------------- */
+    --background: #fbfaf8; /* neutro cálido, no gris azulado */
+    --foreground: #1c1917;
+    --card: #ffffff;
+    --card-foreground: #1c1917;
+    --popover: #ffffff;
+    --popover-foreground: #1c1917;
+    --muted: #f5f3f0;
+    --muted-foreground: #6b6660; /* 5,42:1 */
+    --border: #e0dbd3;
+    --input: #d9d4cc;
+    --ring: var(--sj-naranja-500);
+
+    /* --- Semánticos ------------------------------------------------------ */
+    --primary: var(--sj-naranja-600);
+    --primary-foreground: #ffffff;
+    --acento: var(--sj-naranja-500);
+    --acento-suave: var(--sj-naranja-50);
+    --secondary: #f5f3f0;
+    --secondary-foreground: #1c1917;
+    --accent: var(--sj-naranja-50);
+    --accent-foreground: var(--sj-naranja-800);
+    --destructive: #d40023;
+    --destructive-foreground: #ffffff;
+    --destructive-suave: #fef2f3;
+    --exito: #2e7d14; /* el lima de marca da 1,9:1 y no sirve para esto */
+    --exito-foreground: #ffffff;
+    --exito-suave: #f1f9ed;
+    --aviso: #9a5b00;
+    --aviso-foreground: #ffffff;
+    --aviso-suave: #fdf6ec;
+    --info: var(--sj-morado);
+    --info-foreground: #ffffff;
+    --info-suave: #f7f0fe;
+
+    /* --- Tintas de categoría ---------------------------------------------
+       Versiones oscurecidas de los colores de marca, no los de marca. Una
+       tinta sirve a la vez para el filete de 6px, el icono y la etiqueta.
+       El color nunca va solo: la tarjeta escribe el nombre de la categoría,
+       porque en deuteranopía naranja, lima y carmín colapsan al mismo marrón. */
+    --cat-deportivo: #bd5200; /* 4,80:1 */
+    --cat-cultural: #6a1b9a; /* 9,39:1 */
+    --cat-artistico: #b3123f; /* 6,83:1 */
+    --cat-salud: #0b6e8a; /* 5,81:1 */
+    --cat-formativo: #4e6b0f; /* 6,12:1 */
+    --cat-comunitario: #2e7d14; /* 5,17:1 */
+    --cat-deportivo-suave: #f8eee6;
+    --cat-cultural-suave: #f0e8f5;
+    --cat-artistico-suave: #f7e7ec;
+    --cat-salud-suave: #e7f1f3;
+    --cat-formativo-suave: #edf0e7;
+    --cat-comunitario-suave: #eaf2e8;
+
+    /* --- Series de gráfico -----------------------------------------------
+       El orden alterna naranja / morado / verde / azul para no dejar dos
+       verdes seguidos. */
+    --chart-1: var(--sj-naranja-500);
+    --chart-2: var(--sj-morado);
+    --chart-3: var(--sj-verde-grafico);
+    --chart-4: #0e7c9b;
+    --chart-5: #6b7280;
+    --chart-6: var(--sj-rojo);
+
+    /* --- Forma ------------------------------------------------------------
+       De 8px a 14px: el cambio más pequeño con más efecto sobre la sensación
+       de antigüedad del sitio. */
+    --radius: 0.875rem;
+    --radius-sm: calc(var(--radius) - 2px);
+    --radius-md: var(--radius);
+    --radius-lg: calc(var(--radius) + 4px);
+
+    /* --- Medidas ---------------------------------------------------------- */
+    --container-shell: 1200px;
+
+    /* --- Movimiento -------------------------------------------------------
+       450ms es el tope del sistema: por encima la interfaz se siente lenta. */
+    --duracion-rapida: 150ms; /* hover, press, cambio de color */
+    --duracion-media: 300ms; /* entrada de un elemento */
+    --duracion-lenta: 450ms; /* entrada de una sección */
+    --curva-entrada: cubic-bezier(0.16, 1, 0.3, 1); /* llega y se asienta */
+    --curva-salida: cubic-bezier(0.4, 0, 1, 1); /* se quita de en medio */
+    --desfase-lista: 40ms;
+
+    /* --- Tipografía --------------------------------------------------------
+       Autoalojadas con @fontsource-variable, importadas en el layout. Nunca
+       desde el CDN de Google: el portal es de un organismo público chileno y
+       la Ley 19.628 hace incómodo mandar la IP de cada visitante a un tercero. */
+    --font-sans:
+      'Inter Variable', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui,
+      sans-serif;
+    --font-display:
+      'Rubik Variable', 'Rubik', 'Inter Variable', -apple-system, BlinkMacSystemFont, 'Segoe UI',
+      system-ui, sans-serif;
+
+    /* --- Banderola ---------------------------------------------------------
+       Grosor perpendicular de banda, medido del original. */
+    --bnd: 104px;
+  }
+}
+
+/* ============================================================================
+   Puente con Tailwind v4. `inline` hace que las utilidades apunten a las
+   variables de arriba en vez de copiar su valor, así que cambiar un token en
+   :root cambia el sitio entero sin recompilar el tema.
+   ========================================================================== */
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-acento: var(--acento);
+  --color-acento-suave: var(--acento-suave);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-destructive-suave: var(--destructive-suave);
+  --color-exito: var(--exito);
+  --color-exito-foreground: var(--exito-foreground);
+  --color-exito-suave: var(--exito-suave);
+  --color-aviso: var(--aviso);
+  --color-aviso-foreground: var(--aviso-foreground);
+  --color-aviso-suave: var(--aviso-suave);
+  --color-info: var(--info);
+  --color-info-foreground: var(--info-foreground);
+  --color-info-suave: var(--info-suave);
+
+  --color-violeta: var(--sj-violeta);
+  --color-violeta-honda: var(--sj-violeta-honda);
+  --color-violeta-50: var(--sj-violeta-50);
+  --color-violeta-sobre: var(--violeta-sobre);
+  --color-violeta-activo: var(--violeta-activo);
+
+  --color-banda-lima: var(--banda-lima);
+  --color-banda-naranja: var(--banda-naranja);
+  --color-banda-rojo: var(--banda-rojo);
+
+  --color-marca-naranja: var(--sj-naranja);
+  --color-marca-lima: var(--sj-lima);
+  --color-marca-verde: var(--sj-verde);
+  --color-marca-morado: var(--sj-morado);
+  --color-marca-rojo: var(--sj-rojo);
+
+  --color-naranja-50: var(--sj-naranja-50);
+  --color-naranja-100: var(--sj-naranja-100);
+  --color-naranja-200: var(--sj-naranja-200);
+  --color-naranja-300: var(--sj-naranja-300);
+  --color-naranja-400: var(--sj-naranja-400);
+  --color-naranja-500: var(--sj-naranja-500);
+  --color-naranja-600: var(--sj-naranja-600);
+  --color-naranja-700: var(--sj-naranja-700);
+  --color-naranja-800: var(--sj-naranja-800);
+  --color-naranja-900: var(--sj-naranja-900);
+
+  --color-cat-deportivo: var(--cat-deportivo);
+  --color-cat-cultural: var(--cat-cultural);
+  --color-cat-artistico: var(--cat-artistico);
+  --color-cat-salud: var(--cat-salud);
+  --color-cat-formativo: var(--cat-formativo);
+  --color-cat-comunitario: var(--cat-comunitario);
+  --color-cat-deportivo-suave: var(--cat-deportivo-suave);
+  --color-cat-cultural-suave: var(--cat-cultural-suave);
+  --color-cat-artistico-suave: var(--cat-artistico-suave);
+  --color-cat-salud-suave: var(--cat-salud-suave);
+  --color-cat-formativo-suave: var(--cat-formativo-suave);
+  --color-cat-comunitario-suave: var(--cat-comunitario-suave);
+
+  --font-sans: var(--font-sans);
+  --font-display: var(--font-display);
+
+  --radius-sm: var(--radius-sm);
+  --radius-md: var(--radius-md);
+  --radius-lg: var(--radius-lg);
+
+  --container-shell: var(--container-shell);
+
+  --ease-entrada: var(--curva-entrada);
+  --ease-salida: var(--curva-salida);
+}
+
+/* ============================================================================
+   Base
+   ========================================================================== */
+
+@layer base {
+  *,
+  ::before,
+  ::after {
+    border-color: var(--border);
+  }
+
+  html {
+    -webkit-text-size-adjust: 100%;
+    scroll-behavior: smooth;
+  }
+
+  body {
+    background-color: var(--background);
+    color: var(--foreground);
+    font-family: var(--font-sans);
+    /* 16px es el piso, no el punto de partida a negociar: buena parte del
+       público del portal es adulto mayor. */
+    font-size: 1rem;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  h1,
+  h2,
+  h3 {
+    font-family: var(--font-display);
+    letter-spacing: -0.02em;
+    text-wrap: balance;
+  }
+
+  h4,
+  h5,
+  h6 {
+    font-family: var(--font-display);
+  }
+
+  p {
+    text-wrap: pretty;
+  }
+
+  /* El foco siempre se ve. Prohibido outline:none sin sustituto: quien navega
+     con teclado pierde por completo la noción de dónde está. */
+  :focus-visible {
+    outline: 3px solid var(--ring);
+    outline-offset: 2px;
+    border-radius: 2px;
+  }
+
+  ::selection {
+    background-color: var(--sj-naranja-200);
+    color: var(--sj-naranja-900);
+  }
+
+  /* Las cifras no bailan al cambiar: horarios, teléfonos, fechas y aforos. */
+  time,
+  [data-cifra] {
+    font-variant-numeric: tabular-nums;
+  }
+
+  img,
+  video {
+    max-width: 100%;
+    height: auto;
+  }
+}
+
+/* ============================================================================
+   Utilidades del sistema
+   ========================================================================== */
+
+@layer utilities {
+  .shell {
+    margin-inline: auto;
+    width: 100%;
+    max-width: var(--container-shell);
+    padding-inline: 1rem;
+  }
+
+  @media (min-width: 640px) {
+    .shell {
+      padding-inline: 1.5rem;
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .shell {
+      padding-inline: 2rem;
+    }
+  }
+
+  .tabular {
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* --- Banderola --------------------------------------------------------
+     Tres bandas a 30° de la vertical sobre el campo violeta. Es la firma de
+     la institución y el único ángulo que existe en el sitio.
+
+     Va con gradiente de topes en píxeles a propósito. clip-path: polygon()
+     con porcentajes cambia el ángulo según el ancho —30° en escritorio y
+     cerca de 60° en un teléfono— y skewX arrastra el contenido de los hijos.
+     El ángulo de un linear-gradient es absoluto, así que 120deg son 30°
+     medidos desde la vertical en cualquier pantalla. */
+  .banderola {
+    background-image: linear-gradient(
+      120deg,
+      var(--banda-lima) 0 var(--bnd),
+      var(--banda-naranja) var(--bnd) calc(var(--bnd) * 2),
+      var(--banda-rojo) calc(var(--bnd) * 2) calc(var(--bnd) * 3),
+      var(--sj-violeta) calc(var(--bnd) * 3) 100%
+    );
+  }
+
+  /* Tira fina de cierre de sección: las tres bandas, sin campo violeta. */
+  .banderola-filo {
+    --bnd: 33.333%;
+    background-image: linear-gradient(
+      120deg,
+      var(--banda-lima) 0 var(--bnd),
+      var(--banda-naranja) var(--bnd) calc(var(--bnd) * 2),
+      var(--banda-rojo) calc(var(--bnd) * 2) 100%
+    );
+  }
+
+  /* Corte diagonal a 30°, con el mismo argumento que la banderola: el ángulo
+     del gradiente no depende del tamaño de la caja. */
+  .corte-30 {
+    --corte: 72%;
+    mask-image: linear-gradient(120deg, #000 0 var(--corte), transparent var(--corte));
+  }
+
+  /* Mancha desenfocada del fondo del hero. Solo transform y opacity: animar
+     width o top en un elemento de este tamaño tira los fotogramas en un
+     teléfono de gama media, que es con lo que se visita este sitio. */
+  .mancha {
+    position: absolute;
+    border-radius: 9999px;
+    filter: blur(70px);
+    pointer-events: none;
+  }
+
+  /* Texto enriquecido que viene del panel. El editor solo controla la
+     estructura —párrafos, títulos, listas, enlaces—; el aspecto lo pone el
+     sistema. Así una noticia no puede traer su propia tipografía ni sus
+     propios colores y romper la identidad del sitio. */
+  .prosa > * + * {
+    margin-top: 1.15em;
+  }
+
+  .prosa h2 {
+    font-family: var(--font-display);
+    font-size: 1.5rem;
+    font-weight: 700;
+    line-height: 1.2;
+    margin-top: 2em;
+  }
+
+  .prosa h3 {
+    font-family: var(--font-display);
+    font-size: 1.2rem;
+    font-weight: 700;
+    margin-top: 1.6em;
+  }
+
+  .prosa ul,
+  .prosa ol {
+    padding-left: 1.5rem;
+  }
+
+  .prosa ul {
+    list-style: disc;
+  }
+
+  .prosa ol {
+    list-style: decimal;
+  }
+
+  .prosa li + li {
+    margin-top: 0.4em;
+  }
+
+  .prosa a {
+    color: var(--primary);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+
+  .prosa strong {
+    font-weight: 700;
+  }
+
+  .prosa blockquote {
+    border-left: 4px solid var(--acento);
+    padding-left: 1rem;
+    color: var(--muted-foreground);
+  }
+
+  .enlace-en-texto {
+    color: var(--primary);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    text-decoration-thickness: 1px;
+  }
+
+  .enlace-en-texto:hover {
+    text-decoration-thickness: 2px;
+  }
+
+  /* Objetivo táctil mínimo. Los enlaces dentro de un párrafo quedan fuera a
+     propósito: forzarlos a 44px rompe el interlineado del texto. */
+  .toque {
+    min-height: 2.75rem;
+    min-width: 2.75rem;
+  }
+
+  /* «Saltar al contenido»: invisible hasta que el teclado lo enfoca. */
+  .sr-only-focusable:not(:focus):not(:focus-within) {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border-width: 0;
+  }
+}
+
+/* ============================================================================
+   Movimiento
+
+   Todo —incluido el estado inicial— vive dentro de la consulta. Es el error
+   que se comete siempre: si `opacity: 0` se declara fuera, quien pide menos
+   movimiento se queda con la página en blanco para siempre. Con movimiento
+   reducido debe verse el mismo contenido, quieto y completo.
+   ========================================================================== */
+
+@media (prefers-reduced-motion: no-preference) {
+  [data-revelar] {
+    opacity: 0;
+    transform: translateY(14px);
+    transition:
+      opacity var(--duracion-lenta) var(--curva-entrada),
+      transform var(--duracion-lenta) var(--curva-entrada);
+    transition-delay: var(--retraso, 0ms);
+  }
+
+  [data-revelar][data-visible='si'] {
+    opacity: 1;
+    transform: none;
+  }
+
+  .mancha {
+    animation: deriva 22s var(--curva-entrada) infinite alternate;
+  }
+
+  /* Brillo del esqueleto de carga. Recorre la caja con transform, no con
+     background-position: mover un degradado repinta en cada fotograma. */
+  @keyframes brillo {
+    from {
+      transform: translateX(-100%);
+    }
+    to {
+      transform: translateX(100%);
+    }
+  }
+
+  @keyframes deriva {
+    from {
+      transform: translate3d(0, 0, 0) scale(1);
+    }
+    to {
+      transform: translate3d(4%, -6%, 0) scale(1.08);
+    }
+  }
+}
