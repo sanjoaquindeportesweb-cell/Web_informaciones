@@ -179,19 +179,27 @@ export default buildConfig({
         labels: { singular: 'Respuesta de formulario', plural: 'Respuestas de formularios' },
       },
     }),
-    /* Se añade solo si hay bucket configurado: sin esto, el adaptador arranca
-       apuntando a un bucket vacío y toda subida falla en runtime. */
-    ...(BUCKET_S3
-      ? [
-          s3Storage({
-            collections: { media: true },
-            bucket: BUCKET_S3,
-            config: {
-              region: process.env.S3_REGION,
-              ...(CREDENCIALES_S3 ? { credentials: CREDENCIALES_S3 } : {}),
-            },
-          }),
-        ]
-      : []),
+    /* Siempre en la lista, activo solo si hay bucket. Apagado no toca nada:
+       las subidas siguen yendo al disco local, que es lo correcto en `pnpm
+       dev`. Y encendido apunta al bucket, sin arrancar contra uno vacío.
+
+       Lo que no puede es entrar y salir de `plugins` según el entorno. El
+       plugin registra un proveedor de React en `admin.components.providers`
+       (`S3ClientUploadHandler`), y ese proveedor tiene que estar en
+       `admin/importMap.js`, que se genera una vez y se versiona. Generado sin
+       `S3_BUCKET`, el mapa no lo incluía; en Amplify, donde sí está definido,
+       `RenderServerComponent` no lograba resolverlo y devolvía `null`.
+       Como el proveedor envuelve al resto del panel, se llevaba por delante
+       todo el árbol: /admin en blanco, sin un solo error en consola ni en el
+       servidor. Declarándolo siempre, el mapa vale para los dos entornos. */
+    s3Storage({
+      enabled: Boolean(BUCKET_S3),
+      collections: { media: true },
+      bucket: BUCKET_S3 ?? '',
+      config: {
+        region: process.env.S3_REGION,
+        ...(CREDENCIALES_S3 ? { credentials: CREDENCIALES_S3 } : {}),
+      },
+    }),
   ],
 })
