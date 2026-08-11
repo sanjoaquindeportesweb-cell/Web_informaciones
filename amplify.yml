@@ -20,7 +20,29 @@ frontend:
         # Escribirlas en .env.production hace que Next las cargue tambien al
         # servir. Se listan una por una a proposito: `env` completo volcaria al
         # artefacto de despliegue variables del build que no pintan nada ahi.
-        - env | grep -E '^(DATABASE_URL|PAYLOAD_SECRET|S3_BUCKET|S3_REGION|CRON_SECRET|NEXT_PUBLIC_SERVER_URL)=' >> .env.production
+        #
+        # Las obligatorias se comprueban ANTES, y no es ceremonia: `grep` sale
+        # con codigo 1 cuando no encuentra nada, y Amplify aborta el build ahi
+        # mismo con «Command failed with exit code 1» y ni una pista.
+        #
+        # Aqui NO ha pasado, y por eso es facil de pasar por alto: con las
+        # variables puestas en el panel el grep siempre casa algo y la trampa
+        # no se dispara nunca. Se disparo en el clon de San Pedro de la Paz, en
+        # su primer despliegue, con el panel todavia vacio: el log moria en
+        # esta linea sin nombrar una sola variable. Cualquier entorno nuevo de
+        # este portal -otra rama, otra cuenta- llegaria igual de ciego.
+        - |
+          faltan=""
+          [ -n "$DATABASE_URL" ]   || faltan="$faltan DATABASE_URL"
+          [ -n "$PAYLOAD_SECRET" ] || faltan="$faltan PAYLOAD_SECRET"
+          if [ -n "$faltan" ]; then
+            echo "Faltan variables de entorno en el panel de Amplify:$faltan" >&2
+            echo "Se definen en App settings > Environment variables." >&2
+            exit 1
+          fi
+        # `|| true` porque las opcionales (S3_*, CRON_SECRET) pueden no estar y
+        # eso no es un error: sin bucket, las subidas van al disco de la funcion.
+        - env | grep -E '^(DATABASE_URL|PAYLOAD_SECRET|S3_BUCKET|S3_REGION|CRON_SECRET|NEXT_PUBLIC_SERVER_URL)=' >> .env.production || true
         - pnpm run build
   artifacts:
     baseDirectory: .next
