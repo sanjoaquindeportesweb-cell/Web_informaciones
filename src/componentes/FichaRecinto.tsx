@@ -14,7 +14,8 @@ import { IconoUbicacion } from './Iconos'
  *
  * En `compacta` es la tarjeta de la cuadrícula; en `completa` encabeza la
  * página del recinto. El estado en vivo va en ambas: saber si la piscina está
- * abierta ahora es la consulta que trae a la gente al sitio.
+ * abierta ahora es la consulta que trae a la gente al sitio. El botón de
+ * arriendo también, para no obligar a entrar al detalle solo para arrendar.
  */
 
 type Props = {
@@ -109,6 +110,29 @@ export const FichaRecinto = ({
                 Arrendar este recinto
               </BotonEnlace>
             ) : null}
+          </div>
+        ) : recinto.urlReserva ? (
+          /* `relative z-10` no es decorativo: el enlace del título estira un
+             pseudo-elemento sobre toda la tarjeta (`after:inset-0`) para que
+             se pueda pinchar entera. Sin levantar el botón, esa capa se come
+             el clic y el arriendo termina llevando al detalle del recinto.
+
+             `mt-auto` lo pega abajo: las tarjetas de una fila tienen distinta
+             cantidad de disciplinas y sin esto los botones quedan a alturas
+             distintas. */
+          <div className="relative z-10 mt-auto pt-1">
+            <BotonEnlace
+              href={recinto.urlReserva}
+              externo
+              tamano="sm"
+              /* En la cuadrícula hay varios botones idénticos: quien navega por
+                 enlaces con lector de pantalla necesita saber cuál es cuál, y
+                 «Arrendar» a secas no lo dice. El texto visible sí puede ser
+                 corto, que el nombre ya está en la tarjeta. */
+              aria-label={`Arrendar ${recinto.nombre} (se abre en otra ventana)`}
+            >
+              Arrendar
+            </BotonEnlace>
           </div>
         ) : null}
       </div>
