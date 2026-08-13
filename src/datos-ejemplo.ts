@@ -1,4 +1,5 @@
 import type { Bloque } from '@/bloques/Bloques'
+import { URL_TALLERES } from '@/constantes/enlaces-externos'
 import type { Destacado, Recinto, Noticia } from '@/tipos'
 
 /**
@@ -107,7 +108,7 @@ export const DESTACADOS_EJEMPLO: Destacado[] = [
     titulo: 'Inscríbete en las escuelas deportivas de primavera',
     bajada: 'Natación, básquetbol, atletismo y gimnasia para niñas y niños de 6 a 14 años.',
     imagen: imagen('escuela', 'Niñas y niños entrenando en el gimnasio municipal'),
-    enlace: 'https://ejemplo.plataforma.cl/talleres',
+    enlace: URL_TALLERES,
     externo: true,
     textoEnlace: 'Ver los talleres',
   },
@@ -187,7 +188,7 @@ export const BLOQUES_EJEMPLO: Bloque[] = [
     tipo: 'llamada',
     titulo: '¿Quieres inscribirte en un taller?',
     texto: 'Las inscripciones y los pagos se hacen en la plataforma de trámites de la Corporación.',
-    enlace: 'https://ejemplo.plataforma.cl/talleres',
+    enlace: URL_TALLERES,
     textoEnlace: 'Ir a la plataforma',
     externo: true,
   },

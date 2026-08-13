@@ -14,6 +14,7 @@ import { FormularioContacto } from '@/componentes/FormularioContacto'
 import { Galeria } from '@/componentes/Galeria'
 import { IconoBalon, IconoCalendario, IconoUbicacion } from '@/componentes/Iconos'
 import { MigaDePan } from '@/componentes/MigaDePan'
+import { URL_TALLERES } from '@/constantes/enlaces-externos'
 import { VideoCard } from '@/componentes/VideoCard'
 import { ListaEscalonada, Revelar, TituloAnimado } from '@/lib/movimiento'
 import {
@@ -288,7 +289,7 @@ export default function PaginaGuiaDeEstilo() {
           <Fila etiqueta="Estados">
             <Boton cargando>Enviar</Boton>
             <Boton disabled>Deshabilitado</Boton>
-            <BotonEnlace href="https://ejemplo.plataforma.cl/talleres" externo variante="secundario">
+            <BotonEnlace href={URL_TALLERES} externo variante="secundario">
               Enlace externo
             </BotonEnlace>
           </Fila>
@@ -348,7 +349,7 @@ export default function PaginaGuiaDeEstilo() {
           <AccesoDestacado
             titulo="Inscríbete en talleres"
             descripcion="Escuelas deportivas y talleres de la Corporación."
-            href="https://ejemplo.plataforma.cl/talleres"
+            href={URL_TALLERES}
             externo
             Icono={IconoBalon}
           />
