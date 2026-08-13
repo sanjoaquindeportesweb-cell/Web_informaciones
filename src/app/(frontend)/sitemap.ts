@@ -11,7 +11,14 @@ import config from '@/payload.config'
  * aquí solo hacen falta `slug` y `updatedAt` de cada documento publicado, y
  * pasar por los mapeos completos —imagen, SEO, bloques— sería trabajo que
  * nadie va a leer.
+ *
+ * «Dinámico» es literal y hay que declararlo: Next genera el sitemap durante el
+ * build, y en Amplify ese archivo queda en el artefacto de solo lectura. Se
+ * notaba —el despliegue publicaba 14 URLs y la base ya tenía 15—, y una página
+ * nueva no entraba nunca al sitemap por más que se publicara.
+ * Ver el comentario largo en `app/(frontend)/page.tsx`.
  */
+export const dynamic = 'force-dynamic'
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const payload = await getPayload({ config })
 

@@ -13,11 +13,26 @@ import {
 } from '@/payload/consultas'
 import Link from 'next/link'
 
-/* Red de seguridad: si por lo que sea un hook de revalidación no dispara
-   (Payload nunca llegó a correr afterChange, por ejemplo al restaurar un
-   respaldo de la base de datos), la portada igual se refresca sola una vez
-   por hora en vez de quedar pegada indefinidamente. */
-export const revalidate = 3600
+/* Se renderiza en cada visita, y no es por gusto: acá vivía `revalidate = 3600`
+   y en Amplify eso dejaba la portada congelada en el contenido del build.
+
+   Sin `searchParams` que leer, Next prerenderiza esta ruta durante el build. En
+   Amplify ese HTML queda dentro del artefacto de despliegue, que es de solo
+   lectura, así que Next no puede reescribir la entrada de caché: ni el
+   `revalidatePath` de los hooks de Payload ni el vencimiento por tiempo logran
+   reemplazarla. Comprobado contra el despliegue —tres horas después de vencida
+   la ventana de una hora, cuatro peticiones seguidas devolvían
+   `x-nextjs-cache: HIT` con el contenido viejo, y con CloudFront en MISS, o sea
+   que era el origen y no el CDN.
+
+   `/noticias` y `/[slug]` nunca tuvieron el problema justamente porque leen
+   `searchParams` y eso las vuelve dinámicas. Esto las iguala.
+
+   El costo son las consultas a Mongo en cada visita, el mismo que esas dos
+   rutas ya pagaban. Si algún día el portal se muda a un servidor Node propio,
+   los hooks de `payload/revalidacion.ts` empiezan a servir de verdad y esto se
+   puede volver a cachear. */
+export const dynamic = 'force-dynamic'
 
 /**
  * Portada.

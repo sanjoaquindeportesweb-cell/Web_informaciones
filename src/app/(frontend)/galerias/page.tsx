@@ -8,7 +8,10 @@ import { ListaEscalonada } from '@/lib/movimiento'
 import { metadatosDeListado } from '@/lib/seo'
 import { listarGalerias } from '@/payload/consultas'
 
-export const revalidate = 3600
+/* Dinámica por lo mismo que la portada: prerenderizada en el build, en Amplify
+   se quedaba clavada con las galerías que existían al compilar. Ver el comentario
+   largo en `app/(frontend)/page.tsx`. */
+export const dynamic = 'force-dynamic'
 
 export const metadata = metadatosDeListado(
   'Galerías',

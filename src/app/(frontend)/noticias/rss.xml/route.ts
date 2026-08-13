@@ -1,10 +1,13 @@
 import { URL_DEL_SITIO } from '@/constantes/sitio'
 import { listarNoticias } from '@/payload/consultas'
 
-/* Se revalida junto con el resto de rutas estáticas: el feed no necesita
-   estar más al día que la portada, y evita golpear la base de datos en cada
-   lector de RSS que pase a consultarlo. */
-export const revalidate = 3600
+/* Se genera en cada consulta, igual que la portada y por el mismo motivo: con
+   `revalidate` esto quedaba prerenderizado en el build y en Amplify no había
+   forma de reemplazarlo, así que el feed anunciaba para siempre las noticias
+   que existían al compilar. Un feed de noticias congelado es peor que no tener
+   feed: los lectores lo consultan y concluyen que no se publica nada.
+   Ver el comentario largo en `app/(frontend)/page.tsx`. */
+export const dynamic = 'force-dynamic'
 
 /**
  * Feed RSS de noticias. Sin librerías: es XML de cuatro etiquetas, y traer

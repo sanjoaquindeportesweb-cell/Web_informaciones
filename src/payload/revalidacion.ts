@@ -4,6 +4,21 @@ import type { CollectionAfterChangeHook, CollectionAfterDeleteHook, GlobalAfterC
 /**
  * Revalidación al publicar.
  *
+ * OJO, ANTES DE CONFIAR EN ESTO: en el despliegue actual —Amplify, plataforma
+ * WEB_COMPUTE— estos hooks no logran nada, y no es un error de configuración.
+ * Las rutas que Next prerenderiza durante el build quedan dentro del artefacto
+ * de despliegue, que es de solo lectura: `revalidatePath` no puede reescribir
+ * esa entrada de caché, ni tampoco el vencimiento por tiempo. Se comprobó
+ * contra el despliegue: tres horas después de vencida una ventana de una hora,
+ * la portada seguía devolviendo `x-nextjs-cache: HIT` con el contenido del
+ * build, y con CloudFront en MISS —era el origen, no el CDN.
+ *
+ * Por eso las rutas que muestran contenido del panel van con
+ * `dynamic = 'force-dynamic'` y no con `revalidate`. Estos hooks se conservan
+ * porque son correctos en un servidor Node propio, que es el destino que el
+ * plan del proyecto contempla, y ahí sí ahorran trabajo. Mientras el portal
+ * viva en Amplify son inofensivos y nada más.
+ *
  * Nunca se reconstruye el sitio entero: cada hook invalida solo las rutas
  * que ese documento puede tocar. Con `revalidatePath` corriendo dentro del
  * mismo proceso de Next que sirve las páginas —Payload va montado adentro,
