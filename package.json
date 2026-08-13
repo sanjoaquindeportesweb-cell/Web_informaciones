@@ -17,6 +17,7 @@
     "verificar": "pnpm typecheck && pnpm lint && pnpm audit:contrast",
     "payload": "cross-env NODE_OPTIONS=--no-deprecation payload",
     "sembrar": "cross-env NODE_OPTIONS=--no-deprecation payload run ./src/payload/sembrar.ts",
+    "crear-admin": "cross-env NODE_OPTIONS=--no-deprecation payload run ./src/payload/crear-admin.ts",
     "rellenar-desenfoque": "cross-env NODE_OPTIONS=--no-deprecation payload run ./src/payload/rellenar-desenfoque.ts",
     "start": "cross-env NODE_OPTIONS=--no-deprecation next start",
     "test": "pnpm run test:int && pnpm run test:e2e",
