@@ -35,14 +35,34 @@ frontend:
           faltan=""
           [ -n "$DATABASE_URL" ]   || faltan="$faltan DATABASE_URL"
           [ -n "$PAYLOAD_SECRET" ] || faltan="$faltan PAYLOAD_SECRET"
+          # Sin esta, `URL_DEL_SITIO` cae a http://localhost:3000 dentro de la
+          # funcion SSR. No tumba nada -por eso paso desapercibido- pero deja
+          # la vista previa en vivo del panel apuntando al equipo del editor, y
+          # el sitemap y las imagenes de compartir en redes con URLs a
+          # localhost. Se ve recien cuando alguien comparte una noticia.
+          [ -n "$NEXT_PUBLIC_SERVER_URL" ] || faltan="$faltan NEXT_PUBLIC_SERVER_URL"
+          # S3_BUCKET es opcional en un servidor propio y obligatorio aca: el
+          # disco de la funcion SSR es de solo lectura y efimero, asi que sin
+          # bucket cada foto que suba el equipo de comunicaciones desaparece al
+          # reciclarse el contenedor. Sin error en el panel, sin nada en los
+          # logs: la imagen simplemente ya no esta, y el documento la sigue
+          # referenciando. Es la unica perdida de datos silenciosa que queda en
+          # el despliegue, y por eso el build se detiene.
+          # Para desplegar a proposito sin bucket -una rama de prueba donde no
+          # importa perder las subidas- se define PERMITIR_DISCO_LOCAL=true.
+          if [ -z "$S3_BUCKET" ] && [ "$PERMITIR_DISCO_LOCAL" != "true" ]; then
+            faltan="$faltan S3_BUCKET"
+          fi
           if [ -n "$faltan" ]; then
             echo "Faltan variables de entorno en el panel de Amplify:$faltan" >&2
             echo "Se definen en App settings > Environment variables." >&2
+            echo "Si la falta es S3_BUCKET y de verdad no quieres conservar las" >&2
+            echo "imagenes subidas, define PERMITIR_DISCO_LOCAL=true." >&2
             exit 1
           fi
-        # `|| true` porque las opcionales (S3_*, CRON_SECRET) pueden no estar y
-        # eso no es un error: sin bucket, las subidas van al disco de la funcion.
-        - env | grep -E '^(DATABASE_URL|PAYLOAD_SECRET|S3_BUCKET|S3_REGION|CRON_SECRET|NEXT_PUBLIC_SERVER_URL)=' >> .env.production || true
+        # `|| true` porque quedan opcionales de verdad (S3_REGION, CRON_SECRET,
+        # NEXT_PUBLIC_URL_PLATAFORMA) y que falten no es un error.
+        - env | grep -E '^(DATABASE_URL|PAYLOAD_SECRET|S3_BUCKET|S3_REGION|CRON_SECRET|NEXT_PUBLIC_SERVER_URL|NEXT_PUBLIC_URL_PLATAFORMA)=' >> .env.production || true
         - pnpm run build
   artifacts:
     baseDirectory: .next
