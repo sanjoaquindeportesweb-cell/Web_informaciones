@@ -35,6 +35,37 @@ export const campoSlug = (origen: string): Field => ({
 })
 
 /**
+ * Los tres campos de un enlace editable: etiqueta, destino y si sale del
+ * portal.
+ *
+ * Viven aquí porque los usan el menú principal, sus sub-ítems y los enlaces
+ * legales de la barra superior, y las tres listas tienen que comportarse
+ * igual. Que los enlaces legales no tuvieran `externo` es justamente lo que
+ * dejaba a Transparencia o Ley del Lobby sin poder apuntar al portal del
+ * municipio: se abrían dentro del sitio y sin avisar que uno se estaba yendo.
+ *
+ * `href` es texto libre y no una relación a `paginas` a propósito: estas
+ * listas también apuntan a rutas que no son documentos de esa colección
+ * (`/noticias`, `/recintos`, `/contacto`) y a la plataforma de trámites.
+ */
+export const camposEnlace: Field[] = [
+  { name: 'etiqueta', type: 'text', required: true },
+  {
+    name: 'href',
+    type: 'text',
+    required: true,
+    admin: { description: 'Ruta interna que empieza con / (ej: /noticias) o URL externa completa.' },
+  },
+  {
+    name: 'externo',
+    type: 'checkbox',
+    defaultValue: false,
+    label: 'Sale del portal',
+    admin: { description: 'Márcalo si el enlace lleva fuera del portal: se abre en otra pestaña y avisa con un icono.' },
+  },
+]
+
+/**
  * Grupo de SEO, igual en toda colección con página pública propia. Los tres
  * campos son opcionales porque cada uno tiene un respaldo razonable: el
  * título de la pieza, su resumen, y su portada — declarado en la descripción

@@ -9,6 +9,7 @@ import { buildConfig } from 'payload'
 import { fileURLToPath } from 'url'
 import sharp from 'sharp'
 
+import { URL_DEL_SITIO } from './constantes/sitio'
 import { Media } from './collections/Media'
 import { Users } from './collections/Users'
 import { Noticias } from './collections/Noticias'
@@ -21,11 +22,10 @@ import { MensajesContacto } from './collections/MensajesContacto'
 import { Navegacion } from './globals/Navegacion'
 import { PieDePagina } from './globals/PieDePagina'
 import { AjustesDelSitio } from './globals/AjustesDelSitio'
+import { Portada } from './globals/Portada'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
-
-const URL_DEL_SITIO = process.env.NEXT_PUBLIC_SERVER_URL || 'http://localhost:3000'
 
 /* En un servidor propio las imágenes viven en `staticDir` (ver Media.ts) y eso
    basta. En hosting serverless —Amplify, Lambda— el disco es de solo lectura y
@@ -107,7 +107,7 @@ export default buildConfig({
     Destacados,
     MensajesContacto,
   ],
-  globals: [Navegacion, PieDePagina, AjustesDelSitio],
+  globals: [Navegacion, PieDePagina, AjustesDelSitio, Portada],
   editor: lexicalEditor(),
   secret: process.env.PAYLOAD_SECRET || '',
   typescript: {

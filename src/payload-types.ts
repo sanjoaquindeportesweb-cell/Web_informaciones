@@ -113,11 +113,13 @@ export interface Config {
     navegacion: Navegacion;
     'pie-de-pagina': PieDePagina;
     'ajustes-del-sitio': AjustesDelSitio;
+    portada: Portada;
   };
   globalsSelect: {
     navegacion: NavegacionSelect<false> | NavegacionSelect<true>;
     'pie-de-pagina': PieDePaginaSelect<false> | PieDePaginaSelect<true>;
     'ajustes-del-sitio': AjustesDelSitioSelect<false> | AjustesDelSitioSelect<true>;
+    portada: PortadaSelect<false> | PortadaSelect<true>;
   };
   locale: null;
   widgets: {
@@ -1664,7 +1666,13 @@ export interface Navegacion {
          * Ruta interna que empieza con / (ej: /noticias) o URL externa completa.
          */
         href: string;
+        /**
+         * Márcalo si el enlace lleva fuera del portal: se abre en otra pestaña y avisa con un icono.
+         */
         externo?: boolean | null;
+        /**
+         * Si agregas sub-ítems, el ítem pasa a ser un desplegable y su propio enlace queda como primera opción dentro («Ver …»).
+         */
         hijos?:
           | {
               etiqueta: string;
@@ -1672,6 +1680,9 @@ export interface Navegacion {
                * Ruta interna que empieza con / (ej: /noticias) o URL externa completa.
                */
               href: string;
+              /**
+               * Márcalo si el enlace lleva fuera del portal: se abre en otra pestaña y avisa con un icono.
+               */
               externo?: boolean | null;
               id?: string | null;
             }[]
@@ -1683,18 +1694,27 @@ export interface Navegacion {
   createdAt?: string | null;
 }
 /**
+ * La franja delgada que va sobre el logo, con los enlaces legales y los íconos de redes sociales. Las redes se cargan en «Ajustes del sitio».
+ *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "pie-de-pagina".
  */
 export interface PieDePagina {
   id: string;
   /**
-   * Transparencia, Ley del Lobby, Privacidad. Se muestran en la barra superior.
+   * Transparencia, Ley del Lobby, Privacidad. Si apuntan al portal del municipio y no a una página de este sitio, marca «Sale del portal».
    */
   enlacesLegales?:
     | {
         etiqueta: string;
+        /**
+         * Ruta interna que empieza con / (ej: /noticias) o URL externa completa.
+         */
         href: string;
+        /**
+         * Márcalo si el enlace lleva fuera del portal: se abre en otra pestaña y avisa con un icono.
+         */
+        externo?: boolean | null;
         id?: string | null;
       }[]
     | null;
@@ -1702,6 +1722,8 @@ export interface PieDePagina {
   createdAt?: string | null;
 }
 /**
+ * Identidad y contacto. Los datos de contacto se ven en el pie de página; los íconos de redes, en la barra superior.
+ *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "ajustes-del-sitio".
  */
@@ -1709,20 +1731,65 @@ export interface AjustesDelSitio {
   id: string;
   nombreCorporacion: string;
   /**
-   * Si aún no está confirmada, usa un marcador evidente, nunca una inventada.
+   * Se ve en el pie de página. Si aún no está confirmada, usa un marcador evidente, nunca una inventada.
    */
   direccion: string;
+  /**
+   * Se ve en el pie de página.
+   */
   telefono: string;
   /**
-   * Texto libre y no un campo de correo validado a propósito: mientras no esté confirmado, aquí va un marcador como «[correo por confirmar]», que un campo de tipo email rechazaría por no tener forma de dirección.
+   * Se ve en el pie de página. Texto libre y no un campo de correo validado a propósito: mientras no esté confirmado, aquí va un marcador como «[correo por confirmar]», que un campo de tipo email rechazaría por no tener forma de dirección.
    */
   correo: string;
+  /**
+   * Los íconos se ven en la barra superior, arriba del logo. Solo aparece la red que tenga URL cargada: dejar una en blanco la oculta.
+   */
   redes?: {
     facebook?: string | null;
     instagram?: string | null;
     youtube?: string | null;
+    tiktok?: string | null;
     x?: string | null;
   };
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * Los accesos rápidos y los títulos de sección de la página de inicio. El carrusel se edita en «Destacados»; las noticias y los recintos se llenan solos.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "portada".
+ */
+export interface Portada {
+  id: string;
+  /**
+   * La fila de cuatro tarjetas bajo el carrusel. Con menos de cuatro la fila se acomoda sola; si dejas la lista vacía, se muestran los cuatro de siempre.
+   */
+  accesos?:
+    | {
+        titulo: string;
+        /**
+         * Una línea. La tarjeta es chica y un párrafo no cabe.
+         */
+        descripcion?: string | null;
+        /**
+         * Ruta interna que empieza con / (ej: /recintos) o URL externa completa.
+         */
+        href: string;
+        /**
+         * Márcalo si lleva a la plataforma de trámites o a otro sitio: se abre en otra pestaña y la tarjeta lo avisa.
+         */
+        externo?: boolean | null;
+        /**
+         * El dibujo del cuadrito de arriba de la tarjeta.
+         */
+        icono: 'balon' | 'ubicacion' | 'calendario' | 'telefono' | 'correo' | 'reloj' | 'imagen' | 'info' | 'buscar';
+        id?: string | null;
+      }[]
+    | null;
+  tituloNoticias?: string | null;
+  tituloRecintos?: string | null;
   updatedAt?: string | null;
   createdAt?: string | null;
 }
@@ -1761,6 +1828,7 @@ export interface PieDePaginaSelect<T extends boolean = true> {
     | {
         etiqueta?: T;
         href?: T;
+        externo?: T;
         id?: T;
       };
   updatedAt?: T;
@@ -1782,8 +1850,30 @@ export interface AjustesDelSitioSelect<T extends boolean = true> {
         facebook?: T;
         instagram?: T;
         youtube?: T;
+        tiktok?: T;
         x?: T;
       };
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "portada_select".
+ */
+export interface PortadaSelect<T extends boolean = true> {
+  accesos?:
+    | T
+    | {
+        titulo?: T;
+        descripcion?: T;
+        href?: T;
+        externo?: T;
+        icono?: T;
+        id?: T;
+      };
+  tituloNoticias?: T;
+  tituloRecintos?: T;
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;

@@ -2,16 +2,15 @@ import { AccesoDestacado } from '@/componentes/AccesoDestacado'
 import { CarruselDestacados } from '@/componentes/CarruselDestacados'
 import { EstadoVacio } from '@/componentes/Estados'
 import { FichaRecinto } from '@/componentes/FichaRecinto'
-import {
-  IconoBalon,
-  IconoCalendario,
-  IconoInfo,
-  IconoTelefono,
-  IconoUbicacion,
-} from '@/componentes/Iconos'
+import { ICONOS_ACCESO, IconoInfo } from '@/componentes/Iconos'
 import { TarjetaNoticia } from '@/componentes/TarjetaNoticia'
 import { ListaEscalonada, Revelar } from '@/lib/movimiento'
-import { listarDestacadosVigentes, listarRecintos, listarNoticias } from '@/payload/consultas'
+import {
+  listarDestacadosVigentes,
+  listarRecintos,
+  listarNoticias,
+  obtenerPortada,
+} from '@/payload/consultas'
 import Link from 'next/link'
 
 /* Red de seguridad: si por lo que sea un hook de revalidación no dispara
@@ -26,12 +25,18 @@ export const revalidate = 3600
  * Editorial asimétrica, no una cuadrícula de tarjetas iguales: la noticia
  * principal ocupa dos tercios con la foto a sangre; las secundarias caen en
  * columna. La jerarquía se ve antes de leer.
+ *
+ * Esa maquetación es del componente y sigue viviendo acá — es la razón por la
+ * que la portada no es un documento de `paginas`. Lo editable son los textos:
+ * los accesos rápidos y los dos títulos de sección salen del global «Portada»,
+ * y el carrusel, las noticias y los recintos de sus colecciones.
  */
 export default async function PaginaInicio() {
-  const [destacados, { noticias }, recintos] = await Promise.all([
+  const [destacados, { noticias }, recintos, portada] = await Promise.all([
     listarDestacadosVigentes(),
     listarNoticias({ porPagina: 4 }),
     listarRecintos(),
+    obtenerPortada(),
   ])
 
   const [principal, ...secundarias] = noticias
@@ -52,31 +57,16 @@ export default async function PaginaInicio() {
 
       <section className="shell py-8 md:py-10">
         <ListaEscalonada className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          <AccesoDestacado
-            titulo="Inscríbete en talleres"
-            descripcion="Escuelas deportivas y talleres de la Corporación."
-            href="https://ejemplo.plataforma.cl/talleres"
-            externo
-            Icono={IconoBalon}
-          />
-          <AccesoDestacado
-            titulo="Recintos deportivos"
-            descripcion="Estadio, gimnasio y piscinas de la comuna."
-            href="/recintos"
-            Icono={IconoUbicacion}
-          />
-          <AccesoDestacado
-            titulo="Noticias"
-            descripcion="Lo último de la Corporación."
-            href="/noticias"
-            Icono={IconoCalendario}
-          />
-          <AccesoDestacado
-            titulo="Contacto"
-            descripcion="Dirección, teléfono y formulario."
-            href="/contacto"
-            Icono={IconoTelefono}
-          />
+          {portada.accesos.map((acceso) => (
+            <AccesoDestacado
+              key={`${acceso.titulo}-${acceso.href}`}
+              titulo={acceso.titulo}
+              descripcion={acceso.descripcion}
+              href={acceso.href}
+              externo={acceso.externo}
+              Icono={ICONOS_ACCESO[acceso.icono].Icono}
+            />
+          ))}
         </ListaEscalonada>
       </section>
 
@@ -84,7 +74,7 @@ export default async function PaginaInicio() {
         <div className="shell">
           <Revelar as="header" className="mb-8 flex flex-wrap items-end justify-between gap-4">
             <h2 className="font-display text-[26px] leading-tight font-bold md:text-[34px]">
-              Últimas noticias
+              {portada.tituloNoticias}
             </h2>
             <Link
               href="/noticias"
@@ -125,7 +115,7 @@ export default async function PaginaInicio() {
           <div className="shell">
             <Revelar as="header" className="mb-8 flex flex-wrap items-end justify-between gap-4">
               <h2 className="font-display text-[26px] leading-tight font-bold md:text-[34px]">
-                Recintos deportivos
+                {portada.tituloRecintos}
               </h2>
               <Link
                 href="/recintos"

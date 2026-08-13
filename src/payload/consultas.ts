@@ -5,11 +5,20 @@ import { getPayload } from 'payload'
 
 import config from '@/payload.config'
 import { SITIO_DEMO, type DatosSitio } from '@/componentes/layout/PageShell'
-import type { ClaveRed } from '@/componentes/Iconos'
+import { CLAVES_RED, ICONOS_ACCESO, type ClaveIconoAcceso } from '@/componentes/Iconos'
+import { PORTADA_POR_DEFECTO } from '@/globals/Portada'
 import type { CampoFormulario, DatosFormulario } from '@/componentes/FormularioDinamico'
 import type { DiaHorario } from '@/lib/horarios'
 import type { Bloque } from '@/bloques/Bloques'
-import type { Destacado, Recinto, ItemNavegacion, Imagen, Noticia } from '@/tipos'
+import type {
+  AccesoPortada,
+  DatosPortada,
+  Destacado,
+  Recinto,
+  ItemNavegacion,
+  Imagen,
+  Noticia,
+} from '@/tipos'
 import type {
   Recinto as RecintoDoc,
   Form as FormDoc,
@@ -459,14 +468,33 @@ export const listarDestacadosVigentes = async (): Promise<Destacado[]> => {
 
 /* --- Sitio: navegación, pie de página, ajustes ------------------------------ */
 
-const aItemsNavegacion = (
-  items: { etiqueta: string; href: string; externo?: boolean | null; hijos?: unknown }[] | null | undefined,
-): ItemNavegacion[] =>
-  (items ?? []).map((item) => ({
-    etiqueta: item.etiqueta,
-    href: item.href,
-    externo: item.externo ?? false,
-  }))
+type EnlaceCrudo = {
+  etiqueta: string
+  href: string
+  externo?: boolean | null
+  hijos?: EnlaceCrudo[] | null
+}
+
+/**
+ * Sirve a las tres listas de enlaces del panel —menú, sub-ítems y enlaces
+ * legales—, que comparten los mismos campos (`camposEnlace`).
+ *
+ * `hijos` se omite cuando queda vacío en vez de mandarse como `[]`: es lo que
+ * deja a la cabecera decidir entre pintar un enlace suelto o un desplegable
+ * con una sola comprobación, sin tener que distinguir «sin hijos» de «lista
+ * vacía». Un ítem con la lista de sub-ítems abierta pero sin nada dentro se
+ * comporta como lo que es, un enlace normal.
+ */
+const aItemsNavegacion = (items: EnlaceCrudo[] | null | undefined): ItemNavegacion[] =>
+  (items ?? []).map((item) => {
+    const hijos = aItemsNavegacion(item.hijos)
+    return {
+      etiqueta: item.etiqueta,
+      href: item.href,
+      externo: item.externo ?? false,
+      ...(hijos.length > 0 ? { hijos } : {}),
+    }
+  })
 
 /**
  * Datos del sitio, en la misma forma que `PageShell.DatosSitio`. Si un
@@ -485,9 +513,11 @@ export const obtenerDatosSitio = async (): Promise<DatosSitio> => {
   const items = aItemsNavegacion(navegacion.items)
   const enlacesLegales = aItemsNavegacion(pie.enlacesLegales)
 
+  /* `CLAVES_RED` sale del mismo objeto que dibuja los íconos: sumar una red
+     es tocar `MARCAS_SOCIALES` y el campo del global, y este bucle la recoge
+     sin que haya que acordarse de nada más. */
   const redes: DatosSitio['redes'] = {}
-  const claves: ClaveRed[] = ['facebook', 'instagram', 'youtube', 'x']
-  for (const clave of claves) {
+  for (const clave of CLAVES_RED) {
     const url = ajustes.redes?.[clave]
     if (url) redes[clave] = url
   }
@@ -499,6 +529,33 @@ export const obtenerDatosSitio = async (): Promise<DatosSitio> => {
     correo: ajustes.correo || SITIO_DEMO.correo,
     redes: Object.keys(redes).length > 0 ? redes : SITIO_DEMO.redes,
     enlacesLegales: enlacesLegales.length > 0 ? enlacesLegales : SITIO_DEMO.enlacesLegales,
+  }
+}
+
+/* --- Portada ---------------------------------------------------------------- */
+
+const esClaveIcono = (valor: unknown): valor is ClaveIconoAcceso =>
+  typeof valor === 'string' && valor in ICONOS_ACCESO
+
+export const obtenerPortada = async (): Promise<DatosPortada> => {
+  const payload = await obtenerPayload()
+  const portada = await payload.findGlobal({ slug: 'portada', overrideAccess: false, depth: 0 })
+
+  const accesos: AccesoPortada[] = (portada.accesos ?? []).map((acceso) => ({
+    titulo: acceso.titulo,
+    descripcion: acceso.descripcion ?? undefined,
+    href: acceso.href,
+    externo: acceso.externo ?? false,
+    /* El `select` del panel no puede entregar otra cosa, pero el documento sí
+       —una siembra vieja, una edición a mano en la base— y un icono que este
+       registro no conoce tumbaría el render de la portada completa. */
+    icono: esClaveIcono(acceso.icono) ? acceso.icono : 'info',
+  }))
+
+  return {
+    accesos: accesos.length > 0 ? accesos : PORTADA_POR_DEFECTO.accesos,
+    tituloNoticias: portada.tituloNoticias || PORTADA_POR_DEFECTO.tituloNoticias,
+    tituloRecintos: portada.tituloRecintos || PORTADA_POR_DEFECTO.tituloRecintos,
   }
 }
 

@@ -17,6 +17,8 @@ import { fileURLToPath } from 'node:url'
 import { getPayload, type Payload, type Where } from 'payload'
 
 import config from '@/payload.config'
+import { URL_TALLERES } from '@/constantes/enlaces-externos'
+import { PORTADA_POR_DEFECTO } from '@/globals/Portada'
 
 const dirname = path.dirname(fileURLToPath(import.meta.url))
 const muestra = (archivo: string) => path.resolve(dirname, '../../public/muestras', `${archivo}.webp`)
@@ -233,7 +235,7 @@ const sembrar = async () => {
       titulo: 'Inscríbete en las escuelas deportivas de primavera',
       bajada: 'Natación, básquetbol, atletismo y gimnasia para niñas y niños de 6 a 14 años.',
       imagen: medios.escuela!.id,
-      enlace: 'https://ejemplo.plataforma.cl/talleres',
+      enlace: URL_TALLERES,
       externo: true,
       textoEnlace: 'Ver los talleres',
       orden: 1,
@@ -320,7 +322,7 @@ const sembrar = async () => {
           blockType: 'llamada',
           titulo: '¿Quieres inscribirte en un taller?',
           texto: 'Las inscripciones y los pagos se hacen en la plataforma de trámites de la Corporación.',
-          enlace: 'https://ejemplo.plataforma.cl/talleres',
+          enlace: URL_TALLERES,
           textoEnlace: 'Ir a la plataforma',
           externo: true,
         },
@@ -338,7 +340,7 @@ const sembrar = async () => {
         { etiqueta: 'Noticias', href: '/noticias' },
         { etiqueta: 'Recintos', href: '/recintos' },
         { etiqueta: 'Galerías', href: '/galerias' },
-        { etiqueta: 'Talleres', href: 'https://ejemplo.plataforma.cl/talleres', externo: true },
+        { etiqueta: 'Talleres', href: URL_TALLERES, externo: true },
         { etiqueta: 'Quiénes somos', href: '/quienes-somos' },
         { etiqueta: 'Contacto', href: '/contacto' },
       ],
@@ -371,7 +373,17 @@ const sembrar = async () => {
       },
     },
   })
-  payload.logger.info('Globales listos: navegación, pie de página, ajustes del sitio')
+
+  /* La portada se siembra con exactamente lo que el componente mostraba
+     cuando estos textos vivían en el código: el objetivo de la siembra es un
+     entorno idéntico al que ya se conocía, no uno parecido. `PORTADA_POR_DEFECTO`
+     es la misma constante que sirve de respaldo cuando el global está vacío. */
+  await payload.updateGlobal({
+    slug: 'portada',
+    overrideAccess: true,
+    data: PORTADA_POR_DEFECTO,
+  })
+  payload.logger.info('Globales listos: navegación, barra superior, ajustes del sitio, portada')
 
   payload.logger.info('Siembra completa.')
   process.exit(0)

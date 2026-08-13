@@ -1,15 +1,18 @@
 import Link from 'next/link'
 import type { ReactNode } from 'react'
 
+import { cn } from '@/lib/cn'
 import { FiloBanderola } from '@/componentes/Banderola'
 import {
   IconoCorreo,
+  IconoEnlaceExterno,
   IconoTelefono,
   IconoUbicacion,
   MARCAS_SOCIALES,
   type ClaveRed,
 } from '@/componentes/Iconos'
 import { SelloCorporacion } from '@/componentes/SelloCorporacion'
+import { URL_TALLERES } from '@/constantes/enlaces-externos'
 import type { ItemNavegacion } from '@/tipos'
 import { Cabecera } from './Cabecera'
 import { ControlTexto } from './ControlTexto'
@@ -38,7 +41,7 @@ export const SITIO_DEMO: DatosSitio = {
     { etiqueta: 'Noticias', href: '/noticias' },
     { etiqueta: 'Recintos', href: '/recintos' },
     { etiqueta: 'Galerías', href: '/galerias' },
-    { etiqueta: 'Talleres', href: 'https://ejemplo.plataforma.cl/talleres', externo: true },
+    { etiqueta: 'Talleres', href: URL_TALLERES, externo: true },
     { etiqueta: 'Contacto', href: '/contacto' },
   ],
   direccion: '[dirección por confirmar], San Joaquín',
@@ -53,6 +56,49 @@ export const SITIO_DEMO: DatosSitio = {
     { etiqueta: 'Ley del Lobby', href: '/ley-de-lobby' },
     { etiqueta: 'Privacidad', href: '/privacidad' },
   ],
+}
+
+/**
+ * Enlace de la barra superior.
+ *
+ * Transparencia y Ley del Lobby suelen vivir en el portal del municipio, no
+ * acá: cuando el editor marca «Sale del portal», el enlace se abre en otra
+ * pestaña y lo dice —icono y nombre accesible—, igual que el ítem de Talleres
+ * en el menú principal. Antes esos enlaces solo podían ser internos, así que
+ * apuntar afuera significaba sacar al vecino del portal sin avisarle.
+ */
+const EnlaceUtilidad = ({
+  enlace,
+  className,
+}: {
+  enlace: ItemNavegacion
+  className?: string
+}) => {
+  const clases = cn(
+    'hover:text-violeta-activo inline-flex min-h-8 items-center gap-1 underline-offset-4 hover:underline',
+    className,
+  )
+
+  if (enlace.externo) {
+    return (
+      <a
+        href={enlace.href}
+        target="_blank"
+        rel="noopener noreferrer"
+        aria-label={`${enlace.etiqueta} (se abre en otra ventana)`}
+        className={clases}
+      >
+        {enlace.etiqueta}
+        <IconoEnlaceExterno className="text-[0.9em] opacity-75" />
+      </a>
+    )
+  }
+
+  return (
+    <Link href={enlace.href} className={clases}>
+      {enlace.etiqueta}
+    </Link>
+  )
 }
 
 export const PageShell = ({
@@ -77,12 +123,7 @@ export const PageShell = ({
         <ul className="flex flex-wrap items-center gap-x-4">
           {sitio.enlacesLegales.map((e) => (
             <li key={e.href}>
-              <Link
-                href={e.href}
-                className="hover:text-violeta-activo inline-flex min-h-8 items-center underline-offset-4 hover:underline"
-              >
-                {e.etiqueta}
-              </Link>
+              <EnlaceUtilidad enlace={e} />
             </li>
           ))}
         </ul>
@@ -154,12 +195,10 @@ export const PageShell = ({
           <ul className="mt-3 grid gap-2 text-[15px]">
             {sitio.navegacion.map((item) => (
               <li key={item.href}>
-                <Link
-                  href={item.href}
-                  className="text-violeta-sobre hover:text-violeta-activo underline-offset-4 hover:underline"
-                >
-                  {item.etiqueta}
-                </Link>
+                {/* El mismo componente que la barra superior: el ítem de
+                    Talleres sale del portal y acá se pintaba como enlace
+                    interno, sin pestaña nueva ni aviso. */}
+                <EnlaceUtilidad enlace={item} className="text-violeta-sobre" />
               </li>
             ))}
           </ul>

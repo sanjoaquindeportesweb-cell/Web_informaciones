@@ -1,5 +1,6 @@
-import type { Field, GlobalConfig } from 'payload'
+import type { GlobalConfig } from 'payload'
 
+import { camposEnlace } from '@/payload/campos'
 import { estaAutenticado } from '@/payload/acceso'
 import { revalidarSitio } from '@/payload/revalidacion'
 
@@ -7,27 +8,14 @@ import { revalidarSitio } from '@/payload/revalidacion'
  * Menú principal — la fuente única del navbar.
  *
  * Es lo que hace cierto que crear una página nueva y sumarla al menú no
- * exige tocar código: `href` es texto libre a propósito, no una relación a
- * `paginas`, porque el menú también necesita apuntar a rutas que no son
- * documentos de esa colección (`/noticias`, `/recintos`, `/contacto`) y a
- * enlaces externos hacia la plataforma de trámites.
+ * exige tocar código: los tres campos de cada ítem vienen de `camposEnlace`,
+ * compartidos con los enlaces legales de la barra superior.
  *
- * `hijos` llega hasta un nivel: la cabecera de hoy no pinta submenús
- * desplegables, así que un segundo nivel no se vería. Está declarado para
- * cuando se construya esa parte de la interfaz, no antes.
+ * `hijos` llega hasta un nivel y ese nivel sí se pinta: en escritorio como
+ * panel desplegable y bajo 1024px como acordeón dentro del menú. Un tercer
+ * nivel no existe a propósito — en una cabecera de portal municipal se vuelve
+ * imposible de usar con el dedo, y esconde páginas en vez de mostrarlas.
  */
-
-const camposEnlace: Field[] = [
-  { name: 'etiqueta', type: 'text', required: true },
-  {
-    name: 'href',
-    type: 'text',
-    required: true,
-    admin: { description: 'Ruta interna que empieza con / (ej: /noticias) o URL externa completa.' },
-  },
-  { name: 'externo', type: 'checkbox', defaultValue: false, label: 'Sale del portal' },
-]
-
 export const Navegacion: GlobalConfig = {
   slug: 'navegacion',
   label: 'Navegación principal',
@@ -52,6 +40,10 @@ export const Navegacion: GlobalConfig = {
           name: 'hijos',
           type: 'array',
           label: 'Sub-ítems',
+          admin: {
+            description:
+              'Si agregas sub-ítems, el ítem pasa a ser un desplegable y su propio enlace queda como primera opción dentro («Ver …»).',
+          },
           fields: camposEnlace,
         },
       ],

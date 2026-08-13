@@ -109,6 +109,10 @@ const PARES = [
   ['--violeta-activo', '--sj-violeta', 'texto'],
   ['#ffffff', '--sj-violeta-honda', 'texto'],
   ['--violeta-sobre', '--sj-violeta-honda', 'texto'],
+  /* El panel desplegable de la cabecera va sobre violeta honda, y ahí el
+     sub-ítem activo se pinta con --violeta-activo: la pareja existía en la
+     interfaz sin estar vigilada acá. */
+  ['--violeta-activo', '--sj-violeta-honda', 'texto'],
   ['--banda-lima', '--sj-violeta-honda', 'ui'],
 
   // Tintas de categoría sobre tarjeta blanca y sobre su tinte

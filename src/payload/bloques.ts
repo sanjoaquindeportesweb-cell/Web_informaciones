@@ -5,12 +5,36 @@ import type { Block } from 'payload'
  * Bloques del constructor de páginas.
  *
  * El `slug` de cada bloque coincide letra por letra con el `tipo` del union
- * `Bloque` en `src/bloques/Bloques.tsx`. No es casualidad: en la ruta que
- * resuelva `paginas` (tarea siguiente), mapear un documento de Payload a lo
- * que ese componente espera es tan simple como `tipo: bloque.blockType`. Si
- * algún día un slug de aquí y el `tipo` de allá divergen, el bloque deja de
- * reconocerse y no truena — pero se renderiza vacío, así que conviene no
- * tocar un nombre sin tocar el otro.
+ * `Bloque` en `src/bloques/Bloques.tsx`. No es casualidad: mapear un documento
+ * de Payload a lo que ese componente espera es tan simple como
+ * `tipo: bloque.blockType`. Si algún día un slug de aquí y el `tipo` de allá
+ * divergen, el bloque deja de reconocerse y no truena — pero se renderiza
+ * vacío, así que conviene no tocar un nombre sin tocar el otro.
+ *
+ * ── Cómo se agrega un bloque nuevo ──────────────────────────────────────────
+ *
+ * La lista está pensada para crecer: sumar un tipo son tres archivos y ninguno
+ * de ellos obliga a tocar las páginas ya creadas.
+ *
+ *   1. Acá: un `Block` con su `slug`, sus `labels` en español, su
+ *      `interfaceName` y sus campos. Después, sumarlo a `BLOQUES_PAGINA`.
+ *   2. `src/bloques/Bloques.tsx`: la variante en el union `Bloque` y el `case`
+ *      que la pinta.
+ *   3. `src/payload/consultas.ts`, en `aBloque()`: el `case` que traduce el
+ *      documento de Payload a esa variante.
+ *
+ * Los tres son obligatorios y el orden importa poco, pero saltarse el tercero
+ * es el error que no avisa: `aBloque()` devuelve `null` para un `blockType` que
+ * no reconoce, así que el bloque se guarda bien en el panel, se ve en la vista
+ * previa del editor y no aparece en la página publicada.
+ *
+ * Al terminar, `pnpm generate:types` y `pnpm generate:importmap` — el segundo
+ * solo si el bloque lleva un campo `richText`, que arrastra componentes del
+ * editor al panel.
+ *
+ * Lo que esto NO es: autoservicio desde el panel. Un tipo de bloque nuevo pasa
+ * por código y por un despliegue. Combinar los que ya existen para armar
+ * páginas nuevas, en cambio, no necesita a nadie técnico.
  */
 
 const BloqueTexto: Block = {

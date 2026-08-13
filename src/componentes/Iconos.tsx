@@ -175,6 +175,35 @@ export const IconoPaleta = (p: PropsIcono) => (
   </Base>
 )
 
+/* --- Iconos elegibles desde el panel ---------------------------------------
+   Los accesos rápidos de la portada se editan en el global «Portada», y ahí
+   el icono se elige de una lista. Un componente de React no cabe en un campo
+   de Payload, así que lo que se guarda es la clave y este registro la traduce.
+
+   Es la fuente única de las dos mitades: las opciones del `select` salen de
+   aquí y el componente que pinta también. Escribir la lista dos veces —una en
+   el global, otra en la portada— es cómo se llega a que el panel ofrezca un
+   icono que el sitio no sabe dibujar. */
+
+export const ICONOS_ACCESO = {
+  balon: { etiqueta: 'Balón', Icono: IconoBalon },
+  ubicacion: { etiqueta: 'Ubicación', Icono: IconoUbicacion },
+  calendario: { etiqueta: 'Calendario', Icono: IconoCalendario },
+  telefono: { etiqueta: 'Teléfono', Icono: IconoTelefono },
+  correo: { etiqueta: 'Correo', Icono: IconoCorreo },
+  reloj: { etiqueta: 'Reloj', Icono: IconoReloj },
+  imagen: { etiqueta: 'Imagen', Icono: IconoImagen },
+  info: { etiqueta: 'Información', Icono: IconoInfo },
+  buscar: { etiqueta: 'Lupa', Icono: IconoBuscar },
+} as const
+
+export type ClaveIconoAcceso = keyof typeof ICONOS_ACCESO
+
+/** Opciones para el `select` del panel, en el orden de arriba. */
+export const OPCIONES_ICONO_ACCESO = (
+  Object.entries(ICONOS_ACCESO) as [ClaveIconoAcceso, { etiqueta: string }][]
+).map(([value, { etiqueta }]) => ({ value, label: etiqueta }))
+
 /* --- Redes sociales -------------------------------------------------------
    Van rellenas y sin trazo: son marcas ajenas y hay que dibujarlas como son,
    no como el resto del set. */
@@ -214,6 +243,12 @@ export const IconoYoutube = (p: PropsIcono) => (
   </Marca>
 )
 
+export const IconoTiktok = (p: PropsIcono) => (
+  <Marca {...p}>
+    <path d="M16.5 2.5h-3.2v13.1a2.6 2.6 0 1 1-2.6-2.6c.28 0 .55.04.8.13v-3.3a5.9 5.9 0 1 0 5.1 5.85V9.1a6.5 6.5 0 0 0 3.9 1.28V7.1a3.4 3.4 0 0 1-2.5-1.15A3.6 3.6 0 0 1 16.5 2.5Z" />
+  </Marca>
+)
+
 export const IconoX = (p: PropsIcono) => (
   <Marca {...p}>
     <path d="M17.2 3.5h2.9l-6.35 7.26L21.5 20.5h-5.9l-4.6-6.02-5.28 6.02H2.8l6.8-7.77L2.5 3.5h6.05l4.16 5.5 4.5-5.5Zm-1.02 15.2h1.6L7.9 5.2H6.18l10 13.5Z" />
@@ -224,7 +259,19 @@ export const MARCAS_SOCIALES = {
   facebook: { etiqueta: 'Facebook', Icono: IconoFacebook },
   instagram: { etiqueta: 'Instagram', Icono: IconoInstagram },
   youtube: { etiqueta: 'YouTube', Icono: IconoYoutube },
+  tiktok: { etiqueta: 'TikTok', Icono: IconoTiktok },
   x: { etiqueta: 'X', Icono: IconoX },
 } as const
 
 export type ClaveRed = keyof typeof MARCAS_SOCIALES
+
+/**
+ * El orden de aquí es el orden en que salen los íconos, y es también la lista
+ * que la capa de datos recorre para saber qué redes leer del panel.
+ *
+ * Se deriva del objeto en vez de escribirse a mano porque antes eran dos
+ * listas independientes: al sumar TikTok había que acordarse de tocar las
+ * dos, y olvidar la segunda deja el campo visible en el panel guardando una
+ * URL que el sitio nunca lee. Nadie revisa un ícono que no aparece.
+ */
+export const CLAVES_RED = Object.keys(MARCAS_SOCIALES) as ClaveRed[]

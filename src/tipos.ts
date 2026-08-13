@@ -1,4 +1,5 @@
 import type { ClaveCategoria } from '@/componentes/categorias'
+import type { ClaveIconoAcceso } from '@/componentes/Iconos'
 import type { DiaHorario } from '@/lib/horarios'
 
 /**
@@ -55,5 +56,22 @@ export type ItemNavegacion = {
   etiqueta: string
   href: string
   externo?: boolean
+  /** Un solo nivel: la cabecera pinta este y no busca más abajo. */
   hijos?: ItemNavegacion[]
+}
+
+/** Tarjeta de la fila de accesos rápidos de la portada. */
+export type AccesoPortada = {
+  titulo: string
+  descripcion?: string
+  href: string
+  externo: boolean
+  /** Clave de `ICONOS_ACCESO`: el dibujo no se guarda, se resuelve al pintar. */
+  icono: ClaveIconoAcceso
+}
+
+export type DatosPortada = {
+  accesos: AccesoPortada[]
+  tituloNoticias: string
+  tituloRecintos: string
 }
