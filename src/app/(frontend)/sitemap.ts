@@ -1,9 +1,8 @@
 import type { MetadataRoute } from 'next'
 import { getPayload } from 'payload'
 
+import { URL_DEL_SITIO } from '@/constantes/sitio'
 import config from '@/payload.config'
-
-const URL_DEL_SITIO = process.env.NEXT_PUBLIC_SERVER_URL || 'http://localhost:3000'
 
 /**
  * Sitemap dinámico.

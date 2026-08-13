@@ -1,5 +1,6 @@
 import Link from 'next/link'
 
+import { URL_DEL_SITIO } from '@/constantes/sitio'
 import { IconoChevronDer } from './Iconos'
 
 /**
@@ -11,11 +12,10 @@ import { IconoChevronDer } from './Iconos'
 
 export type Miga = { etiqueta: string; href?: string }
 
-/* La misma variable que usan el sitemap, el RSS y los datos estructurados de
-   noticias/recintos — no un dominio adivinado a mano. Un valor hardcodeado
-   aquí se desincroniza en cuanto el sitio se muda de dominio, y encima
+/* `URL_DEL_SITIO` es la misma constante que usan el sitemap, el RSS y los datos
+   estructurados de noticias/recintos — no un dominio adivinado a mano. Un valor
+   escrito aquí se desincroniza en cuanto el sitio se muda de dominio, y encima
    emitía la URL de producción mientras se probaba en localhost. */
-const URL_DEL_SITIO = process.env.NEXT_PUBLIC_SERVER_URL || 'http://localhost:3000'
 
 export const MigaDePan = ({ migas, base = URL_DEL_SITIO }: {
   migas: Miga[]

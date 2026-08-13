@@ -8,11 +8,11 @@ import '@fontsource-variable/inter'
 import '@fontsource-variable/rubik'
 
 import { PageShell } from '@/componentes/layout/PageShell'
+import { URL_DEL_SITIO } from '@/constantes/sitio'
 import { ProveedorMovimiento } from '@/lib/movimiento'
 import { obtenerDatosSitio } from '@/payload/consultas'
 import './globals.css'
 
-const URL_DEL_SITIO = process.env.NEXT_PUBLIC_SERVER_URL || 'http://localhost:3000'
 const DESCRIPCION =
   'Noticias, recintos deportivos y actividades de la Corporación Municipal de Deportes de San Joaquín.'
 

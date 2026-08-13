@@ -1,7 +1,6 @@
 import type { DiaHorario } from './horarios'
+import { URL_DEL_SITIO } from '@/constantes/sitio'
 import type { Imagen, Noticia, Recinto } from '@/tipos'
-
-const URL_DEL_SITIO = process.env.NEXT_PUBLIC_SERVER_URL || 'http://localhost:3000'
 
 const EDITOR = {
   '@type': 'Organization' as const,

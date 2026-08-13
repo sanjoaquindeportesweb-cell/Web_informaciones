@@ -1,6 +1,5 @@
+import { URL_DEL_SITIO } from '@/constantes/sitio'
 import { listarNoticias } from '@/payload/consultas'
-
-const URL_DEL_SITIO = process.env.NEXT_PUBLIC_SERVER_URL || 'http://localhost:3000'
 
 /* Se revalida junto con el resto de rutas estáticas: el feed no necesita
    estar más al día que la portada, y evita golpear la base de datos en cada
