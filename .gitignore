@@ -31,6 +31,13 @@ yarn-error.log*
 # local env files
 .env*.local
 
+# Permisos que cada quien fue aprobando en su propia máquina: no describen el
+# proyecto y arrastran lo que se haya tecleado en un comando aprobado, que en
+# esta máquina incluía una contraseña de prueba en texto plano. `launch.json`,
+# en cambio, sí se versiona: es la configuración del servidor de desarrollo y
+# sirve igual para todo el equipo.
+.claude/settings.local.json
+
 # vercel
 .vercel
 
