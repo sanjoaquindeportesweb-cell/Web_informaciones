@@ -351,10 +351,27 @@ const sembrar = async () => {
     slug: 'pie-de-pagina',
     overrideAccess: true,
     data: {
+      // Los tres accesos institucionales, en dos líneas y hacia el organismo
+      // CM253. Mismas direcciones que el subdominio de talleres.
       enlacesLegales: [
-        { etiqueta: 'Transparencia', href: '/transparencia' },
-        { etiqueta: 'Ley del Lobby', href: '/ley-de-lobby' },
-        { etiqueta: 'Privacidad', href: '/privacidad' },
+        {
+          etiqueta: 'Plataforma',
+          titulo: 'Ley de Lobby',
+          href: 'https://www.leylobby.gob.cl/instituciones/CM253',
+          externo: true,
+        },
+        {
+          etiqueta: 'Solicitar información',
+          titulo: 'Ley de Transparencia',
+          href: 'https://www.portaltransparencia.cl/PortalPdT/ingreso-sai-v2?idOrg=6828',
+          externo: true,
+        },
+        {
+          etiqueta: 'Transparencia activa',
+          titulo: 'Ley de Transparencia',
+          href: 'https://www.portaltransparencia.cl/PortalPdT/directorio-de-organismos-regulados/?org=CM253',
+          externo: true,
+        },
       ],
     },
   })

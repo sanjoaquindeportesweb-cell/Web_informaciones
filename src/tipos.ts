@@ -60,6 +60,19 @@ export type ItemNavegacion = {
   hijos?: ItemNavegacion[]
 }
 
+/**
+ * Un acceso de la barra superior, que puede ir en dos líneas.
+ *
+ * `titulo` es la segunda, la que va en negrita: el formato institucional
+ * chileno nombra arriba el trámite —«Solicitar información»— y abajo la ley que
+ * lo ampara —«Ley de Transparencia»—. Sin él, el enlace se pinta en una sola
+ * línea; es un tipo aparte de `ItemNavegacion` porque el menú principal no
+ * tiene esa segunda línea y no debería aceptarla.
+ */
+export type EnlaceLegal = ItemNavegacion & {
+  titulo?: string
+}
+
 /** Tarjeta de la fila de accesos rápidos de la portada. */
 export type AccesoPortada = {
   titulo: string

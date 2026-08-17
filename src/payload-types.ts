@@ -1715,6 +1715,10 @@ export interface PieDePagina {
          * Márcalo si el enlace lleva fuera del portal: se abre en otra pestaña y avisa con un icono.
          */
         externo?: boolean | null;
+        /**
+         * Se pinta debajo de la etiqueta y en negrita. Ej.: etiqueta «Solicitar información», segunda línea «Ley de Transparencia». Déjalo vacío para un enlace de una sola línea.
+         */
+        titulo?: string | null;
         id?: string | null;
       }[]
     | null;
@@ -1829,6 +1833,7 @@ export interface PieDePaginaSelect<T extends boolean = true> {
         etiqueta?: T;
         href?: T;
         externo?: T;
+        titulo?: T;
         id?: T;
       };
   updatedAt?: T;

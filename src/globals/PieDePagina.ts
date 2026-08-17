@@ -37,7 +37,32 @@ export const PieDePagina: GlobalConfig = {
         description:
           'Transparencia, Ley del Lobby, Privacidad. Si apuntan al portal del municipio y no a una página de este sitio, marca «Sale del portal».',
       },
-      fields: camposEnlace,
+      /**
+       * Los campos comunes MÁS una segunda línea propia de estos enlaces.
+       *
+       * No se añade a `camposEnlace` porque ese conjunto lo comparte el menú
+       * principal, donde un ítem de dos líneas no tiene sentido: «Noticias» no
+       * lleva bajada. Aquí sí, y es lo que pide el formato institucional —el
+       * mismo del subdominio de talleres—: arriba, en pequeño, para qué sirve
+       * («Solicitar información»); abajo, en negrita, bajo qué ley
+       * («Ley de Transparencia»).
+       *
+       * Es opcional a propósito. Los tres enlaces legales de una corporación
+       * suelen tener ley, pero «Privacidad» no la tiene, y obligar a inventarle
+       * una para poder guardar sería peor que dejarlo en una línea.
+       */
+      fields: [
+        ...camposEnlace,
+        {
+          name: 'titulo',
+          type: 'text',
+          label: 'Segunda línea (ley o norma)',
+          admin: {
+            description:
+              'Se pinta debajo de la etiqueta y en negrita. Ej.: etiqueta «Solicitar información», segunda línea «Ley de Transparencia». Déjalo vacío para un enlace de una sola línea.',
+          },
+        },
+      ],
     },
   ],
 }

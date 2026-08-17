@@ -14,6 +14,7 @@ import type {
   AccesoPortada,
   DatosPortada,
   Destacado,
+  EnlaceLegal,
   Recinto,
   ItemNavegacion,
   Imagen,
@@ -473,6 +474,8 @@ type EnlaceCrudo = {
   href: string
   externo?: boolean | null
   hijos?: EnlaceCrudo[] | null
+  /** Solo lo traen los enlaces legales: la segunda línea, en negrita. */
+  titulo?: string | null
 }
 
 /**
@@ -497,6 +500,24 @@ const aItemsNavegacion = (items: EnlaceCrudo[] | null | undefined): ItemNavegaci
   })
 
 /**
+ * Los enlaces legales, que además pueden traer segunda línea.
+ *
+ * `titulo` se omite cuando viene vacío en vez de mandarse como `''`, por el
+ * mismo motivo que `hijos`: deja a la barra decidir entre una línea y dos con
+ * una sola comprobación, sin distinguir «sin ley» de «ley en blanco».
+ */
+const aEnlacesLegales = (items: EnlaceCrudo[] | null | undefined): EnlaceLegal[] =>
+  (items ?? []).map((item) => {
+    const titulo = item.titulo?.trim()
+    return {
+      etiqueta: item.etiqueta,
+      href: item.href,
+      externo: item.externo ?? false,
+      ...(titulo ? { titulo } : {}),
+    }
+  })
+
+/**
  * Datos del sitio, en la misma forma que `PageShell.DatosSitio`. Si un
  * global todavía no se ha guardado desde el panel, cada pieza cae a
  * `SITIO_DEMO` por separado — un campo vacío no debe dejar el sitio entero
@@ -511,7 +532,7 @@ export const obtenerDatosSitio = async (): Promise<DatosSitio> => {
   ])
 
   const items = aItemsNavegacion(navegacion.items)
-  const enlacesLegales = aItemsNavegacion(pie.enlacesLegales)
+  const enlacesLegales = aEnlacesLegales(pie.enlacesLegales)
 
   /* `CLAVES_RED` sale del mismo objeto que dibuja los íconos: sumar una red
      es tocar `MARCAS_SOCIALES` y el campo del global, y este bucle la recoge

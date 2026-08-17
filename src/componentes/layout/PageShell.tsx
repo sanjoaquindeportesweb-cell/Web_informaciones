@@ -4,6 +4,7 @@ import type { ReactNode } from 'react'
 import { cn } from '@/lib/cn'
 import { FiloBanderola } from '@/componentes/Banderola'
 import {
+  IconoChevronAbajo,
   IconoCorreo,
   IconoEnlaceExterno,
   IconoTelefono,
@@ -13,7 +14,7 @@ import {
 } from '@/componentes/Iconos'
 import { SelloCorporacion } from '@/componentes/SelloCorporacion'
 import { URL_TALLERES } from '@/constantes/enlaces-externos'
-import type { ItemNavegacion } from '@/tipos'
+import type { EnlaceLegal, ItemNavegacion } from '@/tipos'
 import { Cabecera } from './Cabecera'
 import { ControlTexto } from './ControlTexto'
 
@@ -33,7 +34,7 @@ export type DatosSitio = {
   telefono: string
   correo: string
   redes: Partial<Record<ClaveRed, string>>
-  enlacesLegales: ItemNavegacion[]
+  enlacesLegales: EnlaceLegal[]
 }
 
 export const SITIO_DEMO: DatosSitio = {
@@ -51,32 +52,99 @@ export const SITIO_DEMO: DatosSitio = {
     facebook: 'https://www.facebook.com/sanjoaquindeportes/',
     instagram: 'https://www.instagram.com/deportessanjoaquin/',
   },
+  /*
+    Los tres accesos legales, con las direcciones OFICIALES del municipio
+    —organismo CM253 en el portal de transparencia—, no rutas internas que no
+    existen. Son las mismas del subdominio de talleres: definirlas distintas en
+    cada mitad sería garantizar que un día una apunte a un organismo y la otra
+    a otro.
+  */
   enlacesLegales: [
-    { etiqueta: 'Transparencia', href: '/transparencia' },
-    { etiqueta: 'Ley del Lobby', href: '/ley-de-lobby' },
-    { etiqueta: 'Privacidad', href: '/privacidad' },
+    {
+      etiqueta: 'Plataforma',
+      titulo: 'Ley de Lobby',
+      href: 'https://www.leylobby.gob.cl/instituciones/CM253',
+      externo: true,
+    },
+    {
+      etiqueta: 'Solicitar información',
+      titulo: 'Ley de Transparencia',
+      href: 'https://www.portaltransparencia.cl/PortalPdT/ingreso-sai-v2?idOrg=6828',
+      externo: true,
+    },
+    {
+      etiqueta: 'Transparencia activa',
+      titulo: 'Ley de Transparencia',
+      href: 'https://www.portaltransparencia.cl/PortalPdT/directorio-de-organismos-regulados/?org=CM253',
+      externo: true,
+    },
   ],
 }
 
 /**
- * Enlace de la barra superior.
+ * Enlace de la barra superior, en una línea o en dos.
  *
  * Transparencia y Ley del Lobby suelen vivir en el portal del municipio, no
  * acá: cuando el editor marca «Sale del portal», el enlace se abre en otra
  * pestaña y lo dice —icono y nombre accesible—, igual que el ítem de Talleres
  * en el menú principal. Antes esos enlaces solo podían ser internos, así que
  * apuntar afuera significaba sacar al vecino del portal sin avisarle.
+ *
+ * **Con `titulo` se parte en dos líneas: el trámite arriba en pequeño y la ley
+ * abajo en negrita.** Es el formato institucional chileno y el que ya usa el
+ * subdominio de talleres, y hay una razón por la que la negrita va abajo y no
+ * arriba: dos de los tres accesos apuntan a la MISMA ley —«Ley de
+ * Transparencia», una para solicitar información y otra para la transparencia
+ * activa—, así que la línea que los distingue es la de arriba y la que los
+ * agrupa es la de abajo. Poner la negrita en la etiqueta rompería esa lectura.
+ *
+ * En pantallas estrechas las dos líneas se juntan en una, separadas por un
+ * punto medio: tres accesos de dos líneas empujarían la cabecera media pantalla
+ * abajo en un teléfono, que es desde donde se conecta la mayoría.
  */
 const EnlaceUtilidad = ({
   enlace,
   className,
 }: {
-  enlace: ItemNavegacion
+  enlace: EnlaceLegal
   className?: string
 }) => {
   const clases = cn(
     'hover:text-violeta-activo inline-flex min-h-8 items-center gap-1 underline-offset-4 hover:underline',
+    /* Con dos líneas el objetivo táctil llega a los 44px del mínimo y gana
+       caja propia: sin el relleno, el subrayado de hover uniría visualmente un
+       acceso con el siguiente. */
+    enlace.titulo &&
+      'sm:-mx-2 sm:min-h-11 sm:flex-col sm:items-start sm:gap-0 sm:px-2 sm:py-1 sm:leading-tight',
     className,
+  )
+
+  /* El nombre accesible se arma con las dos líneas juntas: leídas por separado,
+     «Solicitar información» y «Ley de Transparencia» no dicen a dónde llevan. */
+  const nombre = enlace.titulo ? `${enlace.etiqueta} · ${enlace.titulo}` : enlace.etiqueta
+
+  /*
+    El icono de «se abre en otra ventana» viaja pegado a la segunda línea, no
+    suelto detrás: en la disposición de dos líneas caería en una tercera, solo,
+    sin nada que lo explique.
+  */
+  const icono = <IconoEnlaceExterno className="shrink-0 text-[0.9em] opacity-75" />
+
+  const contenido = enlace.titulo ? (
+    <>
+      <span className="text-violeta-sobre after:px-1 after:content-['·'] sm:after:content-none">
+        {enlace.etiqueta}
+      </span>
+      <span className="inline-flex items-center gap-1 font-semibold sm:text-[15px]">
+        {enlace.titulo}
+        {enlace.externo ? icono : null}
+      </span>
+    </>
+  ) : (
+    <>
+      {enlace.etiqueta}
+      {enlace.externo ? icono : null}
+    </>
   )
 
   if (enlace.externo) {
@@ -85,18 +153,17 @@ const EnlaceUtilidad = ({
         href={enlace.href}
         target="_blank"
         rel="noopener noreferrer"
-        aria-label={`${enlace.etiqueta} (se abre en otra ventana)`}
+        aria-label={`${nombre} (se abre en otra ventana)`}
         className={clases}
       >
-        {enlace.etiqueta}
-        <IconoEnlaceExterno className="text-[0.9em] opacity-75" />
+        {contenido}
       </a>
     )
   }
 
   return (
-    <Link href={enlace.href} className={clases}>
-      {enlace.etiqueta}
+    <Link href={enlace.href} aria-label={enlace.titulo ? nombre : undefined} className={clases}>
+      {contenido}
     </Link>
   )
 }
@@ -120,13 +187,38 @@ export const PageShell = ({
 
     <div className="bg-violeta-honda text-white">
       <div className="shell flex flex-wrap items-center justify-between gap-x-6 gap-y-1 py-1 text-[13px]">
-        <ul className="flex flex-wrap items-center gap-x-4">
+        {/*
+          ── Los accesos legales, en dos formas ──────────────────────────────
+          En escritorio, los tres en dos líneas. En teléfono, plegados tras un
+          «Transparencia»: desplegados ocupaban 140px —el doble que antes—
+          empujando la cabecera y la noticia principal fuera de la primera
+          pantalla, y esta es una barra de utilidad, no el contenido.
+
+          Es un `<details>` nativo y no un menú con estado: no necesita
+          JavaScript en el cliente, el teclado y los lectores de pantalla ya
+          saben abrirlo, y funciona aunque el bundle no haya cargado todavía.
+        */}
+        <ul className="hidden flex-wrap items-center gap-x-4 sm:flex sm:gap-x-6">
           {sitio.enlacesLegales.map((e) => (
             <li key={e.href}>
               <EnlaceUtilidad enlace={e} />
             </li>
           ))}
         </ul>
+
+        <details className="group sm:hidden">
+          <summary className="hover:text-violeta-activo marker:content-none flex min-h-11 cursor-pointer list-none items-center gap-1.5">
+            Transparencia
+            <IconoChevronAbajo className="transition-transform group-open:rotate-180" />
+          </summary>
+          <ul className="grid gap-y-1 pb-2">
+            {sitio.enlacesLegales.map((e) => (
+              <li key={e.href}>
+                <EnlaceUtilidad enlace={e} />
+              </li>
+            ))}
+          </ul>
+        </details>
 
         <div className="flex items-center gap-3">
           <ControlTexto />
