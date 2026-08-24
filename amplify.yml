@@ -61,8 +61,15 @@ frontend:
             exit 1
           fi
         # `|| true` porque quedan opcionales de verdad (S3_REGION, CRON_SECRET,
-        # NEXT_PUBLIC_URL_PLATAFORMA) y que falten no es un error.
-        - env | grep -E '^(DATABASE_URL|PAYLOAD_SECRET|S3_BUCKET|S3_REGION|CRON_SECRET|NEXT_PUBLIC_SERVER_URL|NEXT_PUBLIC_URL_PLATAFORMA)=' >> .env.production || true
+        # NEXT_PUBLIC_URL_PLATAFORMA, RESEND_API_KEY, EMAIL_REMITENTE) y que
+        # falten no es un error.
+        #
+        # Las dos de Resend tienen que estar en esta lista aunque sean
+        # opcionales. Definidas en el panel pero ausentes de aqui, viven solo en
+        # el contenedor de build: la funcion SSR no las hereda, el adaptador no
+        # se arma y Payload vuelve a escribir los correos en consola. El panel
+        # sigue respondiendo «te enviamos un correo» y nadie recibe nada.
+        - env | grep -E '^(DATABASE_URL|PAYLOAD_SECRET|S3_BUCKET|S3_REGION|CRON_SECRET|NEXT_PUBLIC_SERVER_URL|NEXT_PUBLIC_URL_PLATAFORMA|RESEND_API_KEY|EMAIL_REMITENTE)=' >> .env.production || true
         - pnpm run build
   artifacts:
     baseDirectory: .next

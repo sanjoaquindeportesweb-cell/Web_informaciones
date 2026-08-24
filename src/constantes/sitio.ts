@@ -21,3 +21,14 @@
 export const URL_DEL_SITIO = (
   process.env.NEXT_PUBLIC_SERVER_URL || 'http://localhost:3000'
 ).replace(/\/+$/, '')
+
+/**
+ * Nombre legal de la Corporación.
+ *
+ * Lo usan los datos estructurados —como `Organization` editora— y el nombre del
+ * remitente de los correos que salen del panel. Está acá una vez porque son dos
+ * lugares que tienen que decir exactamente lo mismo: si el remitente no calza
+ * con el nombre que Google ya asoció al sitio, el correo se lee como de un
+ * tercero, que es justo lo que castigan los filtros de spam.
+ */
+export const NOMBRE_ORGANIZACION = 'Corporación Municipal de Deportes de San Joaquín'

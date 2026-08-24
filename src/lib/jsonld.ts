@@ -1,10 +1,10 @@
 import type { DiaHorario } from './horarios'
-import { URL_DEL_SITIO } from '@/constantes/sitio'
+import { NOMBRE_ORGANIZACION, URL_DEL_SITIO } from '@/constantes/sitio'
 import type { Imagen, Noticia, Recinto } from '@/tipos'
 
 const EDITOR = {
   '@type': 'Organization' as const,
-  name: 'Corporación Municipal de Deportes de San Joaquín',
+  name: NOMBRE_ORGANIZACION,
   logo: { '@type': 'ImageObject' as const, url: `${URL_DEL_SITIO}/marca/logo.png` },
 }
 

@@ -1,4 +1,5 @@
 import { mongooseAdapter } from '@payloadcms/db-mongodb'
+import { resendAdapter } from '@payloadcms/email-resend'
 import { formBuilderPlugin, formBuilderTranslations } from '@payloadcms/plugin-form-builder'
 import { redirectsPlugin, redirectsTranslations } from '@payloadcms/plugin-redirects'
 import { lexicalEditor } from '@payloadcms/richtext-lexical'
@@ -9,7 +10,7 @@ import { buildConfig } from 'payload'
 import { fileURLToPath } from 'url'
 import sharp from 'sharp'
 
-import { URL_DEL_SITIO } from './constantes/sitio'
+import { NOMBRE_ORGANIZACION, URL_DEL_SITIO } from './constantes/sitio'
 import { Media } from './collections/Media'
 import { Users } from './collections/Users'
 import { Noticias } from './collections/Noticias'
@@ -44,6 +45,21 @@ const CREDENCIALES_S3 =
         secretAccessKey: process.env.S3_SECRET_ACCESS_KEY,
       }
     : undefined
+
+/* Payload sin adaptador de email no se cae: escribe el correo en la consola del
+   servidor y sigue como si nada. En `pnpm dev` eso es lo deseable —nadie quiere
+   que probar un formulario mande correos a direcciones reales—, y en producción
+   es una trampa, porque lo que se pierde en silencio es la recuperación de
+   contraseña del panel. Ese es el único camino de vuelta si alguien de
+   comunicaciones olvida la suya, y no hay señal de que no llegó: el panel
+   responde «te enviamos un correo» igual.
+
+   Con las dos variables definidas se envía de verdad; sin ellas se mantiene el
+   comportamiento de consola. Se piden las dos y no solo la clave porque Resend
+   rechaza el envío si el dominio del remitente no está verificado en la cuenta,
+   así que una clave sin el remitente correcto falla en todos los correos. */
+const CLAVE_RESEND = process.env.RESEND_API_KEY
+const EMAIL_REMITENTE = process.env.EMAIL_REMITENTE
 
 /* Cada colección con página propia sabe resolver su ruta pública. El `?
    vistaPrevia=1` es lo que las rutas de `app/(frontend)` leen para decidir
@@ -117,6 +133,22 @@ export default buildConfig({
     url: process.env.DATABASE_URL || '',
   }),
   sharp,
+  /* A diferencia de `s3Storage`, este no queda siempre declarado con un
+     interruptor: `email` es una clave de configuración, no un plugin con
+     `enabled`. Tampoco hace falta, y esa es la diferencia que importa acá: el
+     adaptador de correo es solo de servidor y no registra proveedores de React
+     en `admin.components.providers`, así que no toca `importMap.js` y no puede
+     repetir el /admin en blanco que dejó el bucket. Entra y sale de la config
+     sin consecuencias. */
+  ...(CLAVE_RESEND && EMAIL_REMITENTE
+    ? {
+        email: resendAdapter({
+          apiKey: CLAVE_RESEND,
+          defaultFromAddress: EMAIL_REMITENTE,
+          defaultFromName: NOMBRE_ORGANIZACION,
+        }),
+      }
+    : {}),
   /* La publicación programada (noticias, recintos, galerías, páginas)
      depende de que algo procese la cola de jobs. `autoRun` con un cron cada
      minuto es correcto para un servidor Node propio — el plan del proyecto
