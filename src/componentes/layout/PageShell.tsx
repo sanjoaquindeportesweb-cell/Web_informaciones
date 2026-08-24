@@ -45,7 +45,17 @@ export const SITIO_DEMO: DatosSitio = {
     { etiqueta: 'Talleres', href: URL_TALLERES, externo: true },
     { etiqueta: 'Contacto', href: '/contacto' },
   ],
-  direccion: '[dirección por confirmar], San Joaquín',
+  /*
+    La dirección ya está confirmada: la Corporación la entregó el 24 de agosto
+    de 2026. Es la SUYA, no la del municipio —Av. Santa Rosa 2606 es otro
+    edificio, y el subdominio de talleres la publicaba por error—. Las de los
+    recintos siguen con marcador: el estadio y la piscina están en otra parte.
+
+    El teléfono y el correo siguen sin confirmar, y siguen con marcador y no
+    con un valor plausible: en el pie de un portal público un número inventado
+    lo marca alguien de verdad.
+  */
+  direccion: 'Av. Carlos Valdovinos 279, San Joaquín',
   telefono: '[teléfono por confirmar]',
   correo: '[correo por confirmar]',
   redes: {

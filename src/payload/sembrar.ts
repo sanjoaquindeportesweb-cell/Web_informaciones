@@ -381,7 +381,9 @@ const sembrar = async () => {
     overrideAccess: true,
     data: {
       nombreCorporacion: 'Corporación Municipal de Deportes de San Joaquín',
-      direccion: '[dirección por confirmar], San Joaquín',
+      // Confirmada por la Corporación el 24 de agosto de 2026. La de los
+      // recintos de arriba sigue con marcador: son otros edificios.
+      direccion: 'Av. Carlos Valdovinos 279, San Joaquín',
       telefono: '[teléfono por confirmar]',
       correo: '[correo por confirmar]',
       redes: {
