@@ -23,6 +23,17 @@ const DESCRIPCION =
    en vez de compartirse sin imagen ni descripción. */
 export const metadata: Metadata = {
   metadataBase: new URL(URL_DEL_SITIO),
+  /* Sin esto Next no emite `<link rel="canonical">` en ninguna ruta:
+     `metadataBase` solo convierte las relativas de aquí abajo en absolutas, no
+     declara cuál es la URL buena. Y el sitio se sirve en dos hosts —el ápice y
+     `www`, ambos apuntando a la misma rama en Amplify— con contenido idéntico.
+     Sin canónica no hay ninguna señal de cuál manda, así que Google elige por su
+     cuenta y reparte la autoridad entre los dos.
+
+     `'./'` se resuelve contra `metadataBase` más la ruta actual, de modo que
+     cada página declara la suya. Ninguno de los once archivos que definen
+     metadata declara `alternates`, así que todos heredan esta línea. */
+  alternates: { canonical: './' },
   title: {
     default: 'Corporación Municipal de Deportes de San Joaquín',
     template: '%s · Deportes San Joaquín',
