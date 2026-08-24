@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 
+import { URL_DEL_SITIO } from '@/constantes/sitio'
+
 /**
  * Redirecciones desde la colección "Redirecciones".
  *
@@ -34,8 +36,36 @@ type Redireccion = {
   }
 }
 
+/**
+ * Dominio histórico de la Corporación, inscrito en 2010. Servía una página de
+ * mantenimiento hasta que el portal se mudó a `deportesanjoaquin.cl`, y sigue
+ * recibiendo visitas de quien lo tiene guardado o enlazado desde documentos
+ * municipales viejos.
+ */
+const DOMINIO_HISTORICO = 'sanjoaquindeportes.cl'
+
 export const middleware = async (request: NextRequest) => {
   const { pathname, origin } = request.nextUrl
+
+  /* Va ANTES de la consulta a `redirecciones`, y no es cosmético: esa consulta
+     es una petición HTTP más un viaje a Mongo en cada visita. Hacerla para algo
+     que se va a redirigir de todos modos es pagar dos veces por una respuesta
+     que ya está decidida.
+
+     301 y no el 308 que usa la colección de redirecciones más abajo. Ahí el
+     308 es correcto porque conserva el método; aquí lo que hay que comunicar es
+     «este sitio se mudó de dominio», que es el caso de manual del 301 y lo que
+     todo rastreador —incluidos los viejos— interpreta sin ambigüedad para
+     transferir la autoridad al dominio nuevo.
+
+     Conserva la ruta a propósito. El sitio viejo no tenía URLs profundas, así
+     que en la práctica casi todo cae en `/`, pero preservarla no cuesta nada y
+     evita mandar a la portada a quien sí traiga un enlace con ruta. */
+  const host = request.headers.get('host')?.split(':')[0]
+  if (host === DOMINIO_HISTORICO || host === `www.${DOMINIO_HISTORICO}`) {
+    const destino = new URL(request.nextUrl.pathname + request.nextUrl.search, URL_DEL_SITIO)
+    return NextResponse.redirect(destino, 301)
+  }
 
   try {
     const busqueda = new URLSearchParams({
