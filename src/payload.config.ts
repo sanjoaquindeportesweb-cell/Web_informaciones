@@ -158,8 +158,23 @@ export default buildConfig({
      publicación programada quedaría muerta en silencio, que es lo peor que
      puede pasar aquí. Por eso el cron interno se activa con `EJECUTAR_JOBS`
      —se pone en un servidor propio— y, cuando no está, la cola se procesa
-     llamando `POST /api/payload-jobs/run` desde fuera (EventBridge, un cron
-     externo) con la cabecera `Authorization: Bearer $CRON_SECRET`. */
+     llamando `GET /api/payload-jobs/run` desde fuera (EventBridge, un cron
+     externo) con la cabecera `Authorization: Bearer $CRON_SECRET`.
+
+     **Es GET, no POST.** Aquí decía POST y era falso: en 3.87 la ruta está
+     registrada solo para GET —Payload la definió así a propósito, para que
+     sirva desde un cron de Vercel— y con POST devuelve 404. Comprobado contra
+     el despliegue: GET responde 401 «No autorizado» (la ruta existe y rechaza
+     por credenciales) y POST responde 404 (la ruta no existe). Un cron montado
+     siguiendo la instrucción vieja habría recibido 404 en cada ejecución, con
+     el cron aparentemente instalado y la publicación programada igual de
+     muerta, que es exactamente el fallo silencioso que este bloque intentaba
+     evitar.
+
+     Ojo también con la basic auth de Amplify: cubre `/api/*` y usa la misma
+     cabecera `Authorization`, así que mientras esté encendida ningún cron
+     externo puede autenticarse contra este endpoint. Las dos cabeceras chocan
+     y gana el portero. */
   jobs: {
     access: {
       run: ({ req }) => {
