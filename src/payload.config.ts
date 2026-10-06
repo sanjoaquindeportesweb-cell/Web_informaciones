@@ -131,6 +131,15 @@ export default buildConfig({
   },
   db: mongooseAdapter({
     url: process.env.DATABASE_URL || '',
+    /* Sin esto vale el default del driver: 30 s buscando un servidor, que es
+       justo el límite de la petición en Amplify. Cuando Atlas no responde
+       (el 1 de octubre de 2026, un deploy que no podía conectarse) cada visita
+       se quedaba colgada esos 30 s y se cobraban completos: 13 minutos de
+       caída costaron lo que dos meses de uso normal. Con 5 s el sitio falla
+       rápido y barato; una conexión sana a Atlas tarda bastante menos. */
+    connectOptions: {
+      serverSelectionTimeoutMS: 5_000,
+    },
   }),
   sharp,
   /* A diferencia de `s3Storage`, este no queda siempre declarado con un
